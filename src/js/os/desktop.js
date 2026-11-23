@@ -2,6 +2,7 @@
 (function (G) {
   'use strict';
   const U = G.util;
+  const t = G.t;
 
   const DK = {
     el: null,
@@ -79,25 +80,25 @@
     },
 
     iconMenu(n) {
-      const items = [{ label: 'Open', bold: true, action: () => G.fs.open(n) }];
-      if (n.id === 'recycle') items.push({ label: 'Empty Recycle Bin', action: () => G.dialogs.msg({ title: 'Confirm', icon: 'warn', text: G.state.level >= 2 ? 'Some items cannot be deleted. They are still being watched.' : 'Unable to empty the Recycle Bin. The disk is write-protected.' }) });
+      const items = [{ label: t('menu.open'), bold: true, action: () => G.fs.open(n) }];
+      if (n.id === 'd_recycle') items.push({ label: t('dk.emptyBin'), action: () => G.dialogs.msg({ title: t('common.confirm'), icon: 'warn', text: G.state.level >= 2 ? t('dk.emptyBinMsg2') : t('dk.emptyBinMsg') }) });
       items.push({ sep: true });
-      items.push({ label: 'Properties', action: () => G.apps.launch('props', { node: n }) });
+      items.push({ label: t('common.props'), action: () => G.apps.launch('props', { node: n }) });
       return items;
     },
 
     deskMenu() {
       const lvl = G.state.level;
       const items = [
-        { label: 'Arrange Icons By', disabled: true },
-        { label: 'Refresh', action: () => { DK.renderIcons(); if (lvl >= 2 && U.chance(0.5)) G.fx.glitch(160, 1); } },
+        { label: t('dk.arrange'), disabled: true },
+        { label: t('menu.refresh'), action: () => { DK.renderIcons(); if (lvl >= 2 && U.chance(0.5)) G.fx.glitch(160, 1); } },
         { sep: true },
-        { label: 'Paste', disabled: true },
-        { label: 'New', disabled: true },
+        { label: t('dk.paste'), disabled: true },
+        { label: t('dk.new'), disabled: true },
         { sep: true },
-        { label: 'Properties', action: () => G.apps.launch('display') }
+        { label: t('common.props'), action: () => G.apps.launch('display') }
       ];
-      if (lvl >= 3) items.splice(2, 0, { label: "Don't turn around", action: () => { G.audio.play('whisper'); G.fx.subliminal('GOOD.', 120); } });
+      if (lvl >= 3) items.splice(2, 0, { label: t('dk.dontTurn'), action: () => { G.audio.play('whisper'); G.fx.subliminal(t('dk.good'), 120); } });
       return items;
     },
 

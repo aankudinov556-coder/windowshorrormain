@@ -285,9 +285,31 @@
     },
 
     play(name) {
+      // A recorded sample listed in assets/manifest.js replaces the synthesised sound.
+      const sample = G.ASSETS && G.ASSETS.sounds && G.ASSETS.sounds[name];
+      if (sample) { A.sample(G.i18n.asset(sample), () => A.synth(name)); return; }
+      A.synth(name);
+    },
+
+    synth(name) {
       if (!ctx || !SOUNDS[name]) return;
       if (ctx.state === 'suspended') ctx.resume();
       try { SOUNDS[name](); } catch (e) { console.warn('sound', name, e); }
+    },
+
+    // Plays an audio file (works from file:// too). Calls fallback if it can't.
+    sample(src, fallback, onEnd) {
+      try {
+        const a = new Audio(src);
+        a.volume = G.meta.volume;
+        if (onEnd) a.addEventListener('ended', onEnd);
+        a.play().catch(() => { fallback && fallback(); onEnd && onEnd(); });
+        return a;
+      } catch (e) {
+        fallback && fallback();
+        onEnd && onEnd();
+        return null;
+      }
     },
 
     // Continuous 1 kHz reference tone (color bars) or any sine.
@@ -477,7 +499,26 @@
     },
 
     // --- text to speech (Windows SAPI voices sound period-correct) ---
-    hasVoice() { return 'speechSynthesis' in window && voices.length > 0; },
+    // Voices for the current game language only: an English voice reading Russian
+    // text (or the other way round) sounds broken, so then we stay silent and rely on captions.
+    langVoices() {
+      const lang = (G.i18n ? G.i18n.speechLang() : 'en').toLowerCase();
+      return voices.filter((v) => String(v.lang).toLowerCase().replace('_', '-').startsWith(lang));
+    },
+
+    hasVoice() { return 'speechSynthesis' in window && A.langVoices().length > 0; },
+
+    // A recorded line (lang/<code>/assets/voice/...) if the language has one, otherwise TTS.
+    voice(key, text, opts = {}) {
+      const file = key && G.i18n ? G.i18n.voiceFile(key) : null;
+      if (file) {
+        return new Promise((resolve) => {
+          const a = A.sample(file, null, resolve);
+          A._voice = a;
+        });
+      }
+      return A.speak(text, opts);
+    },
 
     speak(text, opts = {}) {
       const est = 900 + String(text).length * 75 / (opts.rate || 0.85);
@@ -487,9 +528,9 @@
         const fin = () => { if (!done) { done = true; resolve(); } };
         try {
           const u = new SpeechSynthesisUtterance(text);
-          const en = voices.filter((v) => /^en/i.test(v.lang));
-          const pref = en.find((v) => /david|mark|george|male|daniel|guy/i.test(v.name)) || en[0] || voices[0];
-          if (pref) u.voice = pref;
+          const list = A.langVoices();
+          const pref = list.find((v) => /david|mark|george|male|daniel|guy|pavel|dmitr|павел|дмитр/i.test(v.name)) || list[0];
+          if (pref) { u.voice = pref; u.lang = pref.lang; }
           u.rate = opts.rate ?? 0.85;
           u.pitch = opts.pitch ?? 0.5;
           u.volume = (opts.volume ?? 1) * G.meta.volume;
@@ -503,6 +544,7 @@
 
     stopSpeech() {
       try { if ('speechSynthesis' in window) speechSynthesis.cancel(); } catch (e) { /* ok */ }
+      if (A._voice) { try { A._voice.pause(); } catch (e) { /* ok */ } A._voice = null; }
     }
   };
 

@@ -228,7 +228,7 @@
         ctx.globalAlpha = 0.07;
         ctx.fillStyle = '#9fb';
         ctx.font = 'bold 54px Tahoma, Verdana, sans-serif';
-        ctx.fillText('STAY TUNED', 210, 690);
+        ctx.fillText(G.t('wp.stayTuned'), 210, 690);
         ctx.restore();
       }
       if (level >= 4) {
@@ -236,7 +236,7 @@
         ctx.globalAlpha = 0.12;
         ctx.fillStyle = '#f33';
         ctx.font = 'bold 40px Tahoma, Verdana, sans-serif';
-        ctx.fillText('THANK YOU FOR WATCHING', 60, 700);
+        ctx.fillText(G.t('wp.thanks'), 60, 700);
         ctx.restore();
       }
 

@@ -24,7 +24,7 @@
 
   // Meta survives a "new game": settings and endings already seen.
   function freshMeta() {
-    return { reduceFlash: false, volume: 0.8, endings: {}, launches: 0, lastEnding: null };
+    return { reduceFlash: false, volume: 0.8, endings: {}, launches: 0, lastEnding: null, lang: null };
   }
 
   G.state = freshState();
@@ -83,7 +83,7 @@
     const q = new URLSearchParams(location.search).get('user');
     if (q) n = q;
     n = n.replace(/[^\p{L}\p{N} ._-]/gu, '').trim().slice(0, 24);
-    if (!n) n = 'Viewer';
+    if (!n) n = G.t('user.default');
     G.userName = n.charAt(0).toUpperCase() + n.slice(1);
   };
 })(window.G);

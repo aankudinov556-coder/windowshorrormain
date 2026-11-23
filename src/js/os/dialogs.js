@@ -2,13 +2,14 @@
 (function (G) {
   'use strict';
   const U = G.util;
+  const t = G.t;
 
   const SOUND = { error: 'ding', warn: 'exclaim', info: 'exclaim', question: null };
 
   const D = {
     msg(o) {
       return new Promise((resolve) => {
-        const buttons = o.buttons || ['OK'];
+        const buttons = o.buttons || [t('common.ok')];
         let result = null;
         const lines = String(o.text || '');
         const w = G.wm.open({
@@ -69,8 +70,8 @@
           o.icon ? U.el('div', { class: 'dlg-icon', html: G.icon(o.icon, 32) }) : null,
           U.el('div', { class: 'dlg-text' }, U.el('div', null, o.text || ''), U.el('div', { class: 'dlg-field' }, o.label ? U.el('label', null, o.label) : null, input))));
         w.body.appendChild(U.el('div', { class: 'dlg-buttons' },
-          U.el('button', { class: 'btn default', onclick: ok }, 'OK'),
-          U.el('button', { class: 'btn', onclick: () => w.close(true) }, 'Cancel')));
+          U.el('button', { class: 'btn default', onclick: ok }, t('common.ok')),
+          U.el('button', { class: 'btn', onclick: () => w.close(true) }, t('common.cancel'))));
         w.center();
         setTimeout(() => input.focus(), 30);
       });

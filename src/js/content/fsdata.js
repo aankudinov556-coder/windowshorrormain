@@ -1,137 +1,157 @@
 // The file tree of Daniel Mercer's computer.
+// Built by G.buildFS() once the language is known, because folder and file
+// names are translated. Ids never change between languages (saves use ids).
+// Dates use content stamps ('YYYY-MM-DD HH:MM', 'TODAY HH:MM', 'NOW'), see util.parseStamp.
 (function (G) {
   'use strict';
+  const t = G.t;
 
-  const lvl = (n) => (s) => s.level >= n;
-  const txt = (id, name, doc, date, size, extra) => Object.assign({ id, name, type: 'file', kind: name.toLowerCase().endsWith('.log') ? 'log' : name.toLowerCase().endsWith('.ini') ? 'ini' : 'txt', doc, date, size: size || '1 KB' }, extra || {});
-  const jpg = (id, name, src, date, size, extra) => Object.assign({ id, name, type: 'file', kind: 'jpg', src: 'assets/img/' + src, date, size: size || '84 KB' }, extra || {});
-  const mpg = (id, name, tape, date, size, extra) => Object.assign({ id, name, type: 'file', kind: 'mpg', tape, date, size }, extra || {});
-  const dir = (id, name, children, extra) => Object.assign({ id, name, type: 'dir', children }, extra || {});
+  G.buildFS = function () {
+    const lvl = (n) => (s) => s.level >= n;
+    const kindOf = (name) => (/\.log$/i.test(name) ? 'log' : /\.ini$/i.test(name) ? 'ini' : 'txt');
+    const txt = (id, name, doc, date, size, extra) => Object.assign({ id, name, type: 'file', kind: kindOf(name), doc, date, size: size || '1 KB' }, extra || {});
+    const jpg = (id, name, src, date, size, extra) => Object.assign({ id, name, type: 'file', kind: 'jpg', src, date, size: size || '84 KB' }, extra || {});
+    const mpg = (id, name, tape, date, size, extra) => Object.assign({ id, name, type: 'file', kind: 'mpg', tape, date, size }, extra || {});
+    const dir = (id, name, children, extra) => Object.assign({ id, name, type: 'dir', children }, extra || {});
 
-  const tree = {
-    id: 'root', name: 'Desktop', type: 'special', pathName: 'Desktop', children: [
+    const tree = {
+      id: 'root', name: t('fs.desktop'), type: 'special', pathName: t('fs.desktop'), children: [
 
-      // ---------------- desktop ----------------
-      { id: 'desktop', name: 'Desktop', type: 'special', pathName: 'Desktop', icon: 'computer', children: [
-        { id: 'd_mycomputer', name: 'My Computer', type: 'file', kind: 'lnk', target: 'mycomputer', icon: 'computer', label: (s) => (s.level >= 3 ? 'Our Computer' : 'My Computer') },
-        { id: 'd_mydocs', name: 'My Documents', type: 'file', kind: 'lnk', target: 'mydocs', icon: 'docs', label: (s) => (s.level >= 3 ? 'Our Documents' : 'My Documents') },
-        { id: 'd_recycle', name: 'Recycle Bin', type: 'file', kind: 'lnk', target: 'recycle', icon: () => (G.fs.children(G.fs.byId('recycle')).length ? 'binFull' : 'binEmpty'), label: (s) => (s.level >= 3 ? 'Recycle Bin (guests)' : 'Recycle Bin') },
-        { id: 'd_mail', name: 'Meridian Mail', type: 'file', kind: 'app', app: 'mail', icon: 'mail', shortcut: true },
-        { id: 'd_tv', name: 'Meridian TV', type: 'file', kind: 'app', app: 'tv', icon: (s) => (s.level >= 3 ? 'tvLive' : 'tv'), shortcut: true, label: (s) => (s.level >= 3 ? 'Channel 12 (LIVE)' : 'Meridian TV') },
-        { id: 'd_backup', name: 'Backup Wizard', type: 'file', kind: 'app', app: 'backup', icon: 'backup', shortcut: true },
-        txt('f_readme', 'READ_ME_FIRST.txt', 'readme', '11/21/2026 6:12 PM', '2 KB'),
-        txt('f_guestlist', 'GUEST_LIST.txt', 'guestList', '10/14/2003 3:33 AM', '1 KB', { show: lvl(3) }),
-        txt('f_goodnight', 'GOODNIGHT.txt', 'goodnight', '10/14/2003 3:33 AM', '1 KB', { show: lvl(4) }),
-        { id: 'd_txctl', name: 'TXCTL', type: 'file', kind: 'app', app: 'cmd', appArgs: { run: 'txctl' }, icon: 'cmd', shortcut: true, show: lvl(4) }
-      ] },
+        // ---------------- desktop ----------------
+        { id: 'desktop', name: t('fs.desktop'), type: 'special', pathName: t('fs.desktop'), icon: 'computer', children: [
+          { id: 'd_mycomputer', name: t('fs.mycomp'), type: 'file', kind: 'lnk', target: 'mycomputer', icon: 'computer', label: (s) => (s.level >= 3 ? t('fs.ourcomp') : t('fs.mycomp')) },
+          { id: 'd_mydocs', name: t('fs.mydocs'), type: 'file', kind: 'lnk', target: 'mydocs', icon: 'docs', label: (s) => (s.level >= 3 ? t('fs.ourdocs') : t('fs.mydocs')) },
+          { id: 'd_recycle', name: t('fs.recycle'), type: 'file', kind: 'lnk', target: 'recycle', icon: () => (G.fs.children(G.fs.byId('recycle')).length ? 'binFull' : 'binEmpty'), label: (s) => (s.level >= 3 ? t('fs.recycleGuests') : t('fs.recycle')) },
+          { id: 'd_mail', name: t('app.mail'), type: 'file', kind: 'app', app: 'mail', icon: 'mail', shortcut: true },
+          { id: 'd_tv', name: t('app.tv'), type: 'file', kind: 'app', app: 'tv', icon: (s) => (s.level >= 3 ? 'tvLive' : 'tv'), shortcut: true, label: (s) => (s.level >= 3 ? t('fs.tvLive') : t('app.tv')) },
+          { id: 'd_backup', name: t('app.backup'), type: 'file', kind: 'app', app: 'backup', icon: 'backup', shortcut: true },
+          txt('f_readme', t('file.readme'), 'readme', '2026-11-21 18:12', '2 KB'),
+          txt('f_guestlist', t('file.guestlist'), 'guestList', '2003-10-14 03:33', '1 KB', { show: lvl(3) }),
+          txt('f_goodnight', t('file.goodnight'), 'goodnight', '2003-10-14 03:33', '1 KB', { show: lvl(4) }),
+          { id: 'd_txctl', name: 'TXCTL', type: 'file', kind: 'app', app: 'cmd', appArgs: { run: 'txctl' }, icon: 'cmd', shortcut: true, show: lvl(4) }
+        ] },
 
-      // ---------------- my computer ----------------
-      { id: 'mycomputer', name: 'My Computer', type: 'special', pathName: 'My Computer', icon: 'computer', label: (s) => (s.level >= 3 ? 'Our Computer' : 'My Computer'), children: [
-        { id: 'drive_a', name: '3½ Floppy (A:)', type: 'drive', icon: 'floppy', driveType: '3½-Inch Floppy Disk', pathName: 'A:\\', children: [],
-          onOpen: () => { G.dialogs.msg({ title: 'A:\\', icon: 'error', text: 'A:\\ is not accessible.\n\nThe device is not ready.' }); return false; } },
+        // ---------------- my computer ----------------
+        { id: 'mycomputer', name: t('fs.mycomp'), type: 'special', pathName: t('fs.mycomp'), icon: 'computer', label: (s) => (s.level >= 3 ? t('fs.ourcomp') : t('fs.mycomp')), children: [
+          { id: 'drive_a', name: t('fs.driveA'), type: 'drive', icon: 'floppy', driveType: 'type.floppy', pathName: 'A:\\', children: [],
+            onOpen: () => { G.dialogs.msg({ title: 'A:\\', icon: 'error', text: t('fs.aNotReady') }); return false; } },
 
-        { id: 'drive_c', name: 'Local Disk (C:)', type: 'drive', icon: 'drive', pathName: 'C:\\', free: '1.2 GB free of 40.0 GB', children: [
-          dir('c_docset', 'Documents and Settings', [
-            dir('c_daniel', 'Daniel', [
-              dir('mydocs', 'My Documents', [
-                dir('mypics', 'My Pictures', [
-                  jpg('p_picnic', 'family_picnic_2001.jpg', 'family_picnic_2001.jpg', '6/17/2001 2:14 PM', '96 KB'),
-                  jpg('p_bday', 'lily_birthday_8.jpg', 'lily_birthday_8.jpg', '3/9/2002 6:40 PM', '88 KB'),
-                  jpg('p_xmas', 'christmas_2002.jpg', 'christmas_2002.jpg', '12/25/2002 8:02 AM', '91 KB'),
-                  jpg('p_lake', 'lake_fishing.jpg', 'lake_fishing.jpg', '7/4/2003 7:31 AM', '102 KB'),
-                  jpg('p_tower', 'pell_hill_tower.jpg', 'pell_hill_tower.jpg', '8/11/2003 5:55 PM', '77 KB'),
-                  jpg('p_control', 'station_control_room.jpg', 'station_control_room.jpg', '8/30/2003 1:12 AM', '70 KB'),
-                  jpg('p_staff', 'ch12_staff_2003.jpg', (s) => (s.level >= 3 ? 'ch12_staff_2003_b.jpg' : 'ch12_staff_2003.jpg'), '9/5/2003 4:00 PM', '110 KB'),
-                  jpg('p_moon', 'lily_moon_costume.jpg', 'lily_moon_costume.jpg', '10/12/2003 6:21 PM', '93 KB'),
-                  jpg('p_0047', 'IMG_0047.jpg', 'IMG_0047.jpg', '10/14/2003 3:33 AM', '64 KB', { show: lvl(1) })
-                ], { icon: 'pics' }),
-                dir('mymusic', 'My Music', [], { icon: 'music', emptyText: 'This folder is empty.' }),
-                dir('station', 'Station', [
-                  txt('f_schedule', 'schedule_oct2003.txt', 'schedule', '9/30/2003 11:02 AM'),
-                  txt('f_procedure', 'SIGNOFF_PROCEDURE.txt', 'procedure', '9/25/2003 4:48 AM', '2 KB'),
-                  dir('engineering', 'Engineering', [
-                    txt('f_englog', 'engineering_log.txt', 'englog', '10/14/2003 3:31 AM', '4 KB'),
-                    txt('f_bearing', 'walt_bearing.txt', 'bearing', '9/20/2003 6:10 AM'),
-                    txt('f_returnnotes', 'return_signal_notes.txt', 'returnNotes', '10/2/2003 5:17 AM'),
-                    dir('frames', 'frame_captures', [
-                      jpg('p_f233', 'frame_0233.jpg', 'frame_0233.jpg', '9/23/2003 4:40 AM', '22 KB'),
-                      jpg('p_f234', 'frame_0234.jpg', 'frame_0234.jpg', '9/23/2003 4:40 AM', '22 KB'),
-                      jpg('p_f237', 'frame_0237.jpg', 'frame_0237.jpg', '9/23/2003 4:41 AM', '23 KB')
-                    ])
-                  ], { locked: '20525' })
-                ]),
-                dir('personal', 'Personal', [
-                  txt('f_todo', 'todo.txt', 'todo', '10/13/2003 11:50 PM'),
-                  txt('f_letter', 'letter_to_lily.txt', 'letter', '10/12/2003 2:14 AM'),
-                  txt('f_budget', 'budget_oct2003.txt', 'budget', '10/1/2003 9:00 PM'),
-                  txt('f_dreams', 'dreams.txt', 'dreams', '10/8/2003 4:44 AM'),
-                  txt('f_chili', 'chili.txt', 'chili', '1/19/2003 3:30 PM'),
-                  txt('f_program', 'play_program.txt', 'program', '10/6/2003 7:15 PM')
-                ]),
-                txt('f_readmeviewer', 'README_VIEWER.txt', 'readmeViewer', '{DATE} 3:33 AM', '1 KB', { show: lvl(2) })
-              ], { icon: 'docs', addr: 'My Documents' }),
-              dir('c_favorites', 'Favorites', [], { emptyText: 'This folder is empty.', noBackup: true })
+          { id: 'drive_c', name: t('fs.driveC'), type: 'drive', icon: 'drive', pathName: 'C:\\', free: t('fs.freeC'), children: [
+            dir('c_docset', 'Documents and Settings', [
+              dir('c_daniel', 'Daniel', [
+                dir('mydocs', t('fs.mydocs'), [
+                  dir('mypics', t('fs.mypics'), [
+                    jpg('p_picnic', t('file.p_picnic'), 'family_picnic_2001.jpg', '2001-06-17 14:14', '96 KB'),
+                    jpg('p_bday', t('file.p_bday'), 'lily_birthday_8.jpg', '2002-03-09 18:40', '88 KB'),
+                    jpg('p_xmas', t('file.p_xmas'), 'christmas_2002.jpg', '2002-12-25 08:02', '91 KB'),
+                    jpg('p_lake', t('file.p_lake'), 'lake_fishing.jpg', '2003-07-04 07:31', '102 KB'),
+                    jpg('p_tower', t('file.p_tower'), 'pell_hill_tower.jpg', '2003-08-11 17:55', '77 KB'),
+                    jpg('p_control', t('file.p_control'), 'station_control_room.jpg', '2003-08-30 01:12', '70 KB'),
+                    jpg('p_staff', t('file.p_staff'), (s) => (s.level >= 3 ? 'ch12_staff_2003_b.jpg' : 'ch12_staff_2003.jpg'), '2003-09-05 16:00', '110 KB'),
+                    jpg('p_moon', t('file.p_moon'), 'lily_moon_costume.jpg', '2003-10-12 18:21', '93 KB'),
+                    jpg('p_0047', 'IMG_0047.jpg', 'IMG_0047.jpg', '2003-10-14 03:33', '64 KB', { show: lvl(1) })
+                  ], { icon: 'pics' }),
+                  dir('mymusic', t('fs.mymusic'), [], { icon: 'music', emptyText: t('fs.emptyFolder') }),
+                  dir('station', t('fs.station'), [
+                    txt('f_schedule', t('file.schedule'), 'schedule', '2003-09-30 11:02'),
+                    txt('f_procedure', t('file.procedure'), 'procedure', '2003-09-25 04:48', '2 KB'),
+                    dir('engineering', t('fs.engineering'), [
+                      txt('f_englog', t('file.englog'), 'englog', '2003-10-14 03:31', '4 KB'),
+                      txt('f_bearing', t('file.bearing'), 'bearing', '2003-09-20 06:10'),
+                      txt('f_returnnotes', t('file.returnnotes'), 'returnNotes', '2003-10-02 05:17'),
+                      dir('frames', 'frame_captures', [
+                        jpg('p_f233', 'frame_0233.jpg', 'frame_0233.jpg', '2003-09-23 04:40', '22 KB'),
+                        jpg('p_f234', 'frame_0234.jpg', 'frame_0234.jpg', '2003-09-23 04:40', '22 KB'),
+                        jpg('p_f237', 'frame_0237.jpg', 'frame_0237.jpg', '2003-09-23 04:41', '23 KB')
+                      ])
+                    ], { locked: '20525' })
+                  ]),
+                  dir('personal', t('fs.personal'), [
+                    txt('f_todo', t('file.todo'), 'todo', '2003-10-13 23:50'),
+                    txt('f_letter', t('file.letter'), 'letter', '2003-10-12 02:14'),
+                    txt('f_budget', t('file.budget'), 'budget', '2003-10-01 21:00'),
+                    txt('f_dreams', t('file.dreams'), 'dreams', '2003-10-08 04:44'),
+                    txt('f_chili', t('file.chili'), 'chili', '2003-01-19 15:30'),
+                    txt('f_program', t('file.program'), 'program', '2003-10-06 19:15')
+                  ]),
+                  txt('f_readmeviewer', 'README_VIEWER.txt', 'readmeViewer', 'TODAY 03:33', '1 KB', { show: lvl(2) })
+                ], { icon: 'docs', addr: t('fs.mydocs') }),
+                dir('c_favorites', t('fs.favorites'), [], { emptyText: t('fs.emptyFolder'), noBackup: true })
+              ]),
+              dir('c_allusers', 'All Users', [], { emptyText: t('fs.emptyFolder') })
             ]),
-            dir('c_allusers', 'All Users', [], { emptyText: 'This folder is empty.' })
-          ]),
-          dir('c_progs', 'Program Files', [
-            dir('c_burrell', 'Burrell Broadcast', [
-              dir('c_txctl', 'TXCTL', [
-                { id: 'f_txctl_exe', name: 'txctl.exe', type: 'file', kind: 'app', app: 'cmd', appArgs: { run: 'txctl' }, icon: 'cmd', date: '3/2/1998 12:00 PM', size: '88 KB' },
-                txt('f_txctl_readme', 'README.TXT', 'txctl', '10/11/2003 11:40 PM', '2 KB')
+            dir('c_progs', 'Program Files', [
+              dir('c_burrell', 'Burrell Broadcast', [
+                dir('c_txctl', 'TXCTL', [
+                  { id: 'f_txctl_exe', name: 'txctl.exe', type: 'file', kind: 'app', app: 'cmd', appArgs: { run: 'txctl' }, icon: 'cmd', date: '1998-03-02 12:00', size: '88 KB' },
+                  txt('f_txctl_readme', 'README.TXT', 'txctl', '2003-10-11 23:40', '2 KB')
+                ])
+              ]),
+              dir('c_mtv', 'Meridian TV', [
+                { id: 'f_mtv_exe', name: 'mtv.exe', type: 'file', kind: 'app', app: 'tv', icon: 'tv', date: '2002-06-02 19:22', size: '1.4 MB' },
+                { id: 'f_mtvsched', name: 'mtvsched.exe', type: 'file', kind: 'exe', date: '2002-06-02 19:22', size: '212 KB' }
+              ]),
+              dir('c_mmail', 'Meridian Mail', [
+                { id: 'f_mmail_exe', name: 'mmail.exe', type: 'file', kind: 'app', app: 'mail', icon: 'mail', date: '2002-06-02 19:20', size: '980 KB' }
               ])
             ]),
-            dir('c_mtv', 'Meridian TV', [
-              { id: 'f_mtv_exe', name: 'mtv.exe', type: 'file', kind: 'app', app: 'tv', icon: 'tv', date: '6/2/2002 7:22 PM', size: '1.4 MB' },
-              { id: 'f_mtvsched', name: 'mtvsched.exe', type: 'file', kind: 'exe', date: '6/2/2002 7:22 PM', size: '212 KB' }
-            ]),
-            dir('c_mmail', 'Meridian Mail', [
-              { id: 'f_mmail_exe', name: 'mmail.exe', type: 'file', kind: 'app', app: 'mail', icon: 'mail', date: '6/2/2002 7:20 PM', size: '980 KB' }
-            ])
-          ]),
-          dir('c_sys', 'MERIDIAN', [
-            txt('f_sysini', 'system.ini', 'systemIni', '10/14/2003 3:33 AM'),
-            txt('f_setuplog', 'setup.log', 'setupLog', '6/2/2002 7:30 PM'),
-            { id: 'f_hostdll', name: 'host.dll', type: 'file', kind: 'dll', date: '{DATE} 3:33 AM', size: '3,333 KB', show: lvl(2), onOpen: () => { G.story.hostProgram(); return false; } },
-            { id: 'f_kernel', name: 'kernel.sys', type: 'file', kind: 'sys', date: '6/2/2002 7:04 PM', size: '1.1 MB' }
-          ], { noBackup: true })
+            dir('c_sys', 'MERIDIAN', [
+              txt('f_sysini', 'system.ini', 'systemIni', '2003-10-14 03:33'),
+              txt('f_setuplog', 'setup.log', 'setupLog', '2002-06-02 19:30'),
+              { id: 'f_hostdll', name: 'host.dll', type: 'file', kind: 'dll', date: 'TODAY 03:33', size: '3,333 KB', show: lvl(2), onOpen: () => { G.story.hostProgram(); return false; } },
+              { id: 'f_kernel', name: 'kernel.sys', type: 'file', kind: 'sys', date: '2002-06-02 19:04', size: '1.1 MB' }
+            ], { noBackup: true })
+          ] },
+
+          { id: 'drive_d', name: t('fs.driveD'), type: 'drive', icon: 'driveTv', pathName: 'D:\\', free: t('fs.freeD'), children: [
+            mpg('t1', 'CH12_2003-09-01_0200.mpg', 't_signoff', '2003-09-01 02:04', '3.1 GB'),
+            mpg('t2', 'CH12_2003-09-16_0333.mpg', 't_return', '2003-09-16 03:58', '4.4 GB'),
+            mpg('t3', 'CH12_2003-09-22_0333.mpg', 't_host', '2003-09-22 03:58', '4.4 GB'),
+            mpg('t4', 'CH12_2003-09-30_0333.mpg', 't_eas', '2003-09-30 03:58', '4.4 GB'),
+            mpg('t5', 'CH12_2003-10-09_0333.mpg', 't_outside', '2003-10-09 03:58', '4.4 GB'),
+            mpg('t6', 'CH12_2003-10-14_0333.mpg', 't_inside', '2003-10-14 03:58', '4.4 GB'),
+            mpg('t7', 'CH12_LIVE.mpg', 't_live', 'TODAY 03:33', '∞', { show: lvl(3) })
+          ] },
+
+          { id: 'drive_e', name: t('fs.driveE'), type: 'drive', icon: 'usb', driveType: 'type.removable', pathName: 'E:\\', free: t('fs.freeE'), children: [
+            { id: 'e_pics', name: t('file.e_pics'), type: 'file', kind: 'mbk', icon: 'backup', size: '1.1 MB', date: 'NOW', show: (s) => !!s.backups.pics },
+            { id: 'e_docs', name: t('file.e_docs'), type: 'file', kind: 'mbk', icon: 'backup', size: '96 KB', date: 'NOW', show: (s) => !!s.backups.docs },
+            { id: 'e_mail', name: t('file.e_mail'), type: 'file', kind: 'mbk', icon: 'backup', size: '64 KB', date: 'NOW', show: (s) => !!s.backups.mail },
+            { id: 'e_log', name: 'backup.log', type: 'file', kind: 'txt', doc: 'backupLog', size: '1 KB', date: 'NOW', show: (s) => Object.keys(s.backups).length > 0 }
+          ] }
         ] },
 
-        { id: 'drive_d', name: 'TV Capture (D:)', type: 'drive', icon: 'driveTv', pathName: 'D:\\', free: '0 bytes free of 40.0 GB', children: [
-          mpg('t1', 'CH12_2003-09-01_0200.mpg', 't_signoff', '9/1/2003 2:04 AM', '3.1 GB'),
-          mpg('t2', 'CH12_2003-09-16_0333.mpg', 't_return', '9/16/2003 3:58 AM', '4.4 GB'),
-          mpg('t3', 'CH12_2003-09-22_0333.mpg', 't_host', '9/22/2003 3:58 AM', '4.4 GB'),
-          mpg('t4', 'CH12_2003-09-30_0333.mpg', 't_eas', '9/30/2003 3:58 AM', '4.4 GB'),
-          mpg('t5', 'CH12_2003-10-09_0333.mpg', 't_outside', '10/9/2003 3:58 AM', '4.4 GB'),
-          mpg('t6', 'CH12_2003-10-14_0333.mpg', 't_inside', '10/14/2003 3:58 AM', '4.4 GB'),
-          mpg('t7', 'CH12_LIVE.mpg', 't_live', '{DATE} 3:33 AM', '∞', { show: lvl(3) })
-        ] },
+        // ---------------- recycle bin ----------------
+        { id: 'recycle', name: t('fs.recycle'), type: 'special', pathName: t('fs.recycle'), icon: 'binFull', children: [] },
+        txt('r_tapenotes', t('file.tapenotes'), 'tapeNotes', '2003-09-23 05:02', '1 KB', { bin: 'station' }),
+        jpg('r_dsc', 'DSC_0013.jpg', 'DSC_0013.jpg', '2003-10-09 03:41', '71 KB', { bin: 'mypics' }),
+        txt('r_untitled', t('file.untitled'), 'untitled', '2003-10-13 03:34', '1 KB', { bin: 'personal' })
+      ]
+    };
 
-        { id: 'drive_e', name: 'BYTELINE_BKP (E:)', type: 'drive', icon: 'usb', driveType: 'Removable Disk', pathName: 'E:\\', free: '14.2 GB free of 16.0 GB', children: [
-          { id: 'e_pics', name: 'Pictures.mbk', type: 'file', kind: 'mbk', icon: 'backup', size: '1.1 MB', date: '{DATE}', show: (s) => !!s.backups.pics },
-          { id: 'e_docs', name: 'Documents.mbk', type: 'file', kind: 'mbk', icon: 'backup', size: '96 KB', date: '{DATE}', show: (s) => !!s.backups.docs },
-          { id: 'e_mail', name: 'Mail.mbk', type: 'file', kind: 'mbk', icon: 'backup', size: '64 KB', date: '{DATE}', show: (s) => !!s.backups.mail },
-          { id: 'e_log', name: 'backup.log', type: 'file', kind: 'txt', doc: 'backupLog', size: '1 KB', date: '{DATE}', show: (s) => Object.keys(s.backups).length > 0 }
-        ] }
-      ] },
+    G.fs.init(tree);
+  };
 
-      // ---------------- recycle bin ----------------
-      { id: 'recycle', name: 'Recycle Bin', type: 'special', pathName: 'Recycle Bin', icon: 'binFull', children: [] },
-      txt('r_tapenotes', 'tape_notes_DO_NOT_WATCH.txt', 'tapeNotes', '9/23/2003 5:02 AM', '1 KB', { bin: 'station' }),
-      jpg('r_dsc', 'DSC_0013.jpg', 'DSC_0013.jpg', '10/9/2003 3:41 AM', '71 KB', { bin: 'mypics' }),
-      txt('r_untitled', 'untitled.txt', 'untitled', '10/13/2003 3:34 AM', '1 KB', { bin: 'personal' })
-    ]
+  // Text of a document node: pack key 'doc.<id>' (string, or function of state).
+  G.docText = function (node) {
+    if (!node) return '';
+    if (node.doc === 'backupLog') return G.backupLog(G.state);
+    const d = node.doc ? G.t('doc.' + node.doc) : node.text;
+    return G.util.fill(d || '');
   };
 
   // A backup log that grows as the player backs things up.
-  G.docs.backupLog = (s) => {
-    const lines = ['BYTELINE Backup Log — job #4471', '-------------------------------'];
-    if (s.backups.pics) lines.push('[OK]   My Pictures      ' + (s.flags.picsSkipped ? '(1 file skipped: IMG_0047.jpg — in use)' : ''));
-    if (s.backups.docs) lines.push('[OK]   My Documents');
-    if (s.backups.mail) lines.push('[OK]   E-mail');
-    if (s.level >= 3) lines.push('[--]   TV Recordings    waiting for you');
+  G.backupLog = (s) => {
+    const lines = [t('bklog.title'), '-------------------------------'];
+    if (s.backups.pics) lines.push(t('bklog.pics') + (s.flags.picsSkipped ? '   ' + t('bklog.skipped') : ''));
+    if (s.backups.docs) lines.push(t('bklog.docs'));
+    if (s.backups.mail) lines.push(t('bklog.mail'));
+    if (s.level >= 3) lines.push(t('bklog.tapes'));
     return lines.join('\n');
   };
 
-  G.fs.init(tree);
+  // Rebuild everything that depends on the language.
+  G.buildContent = function () {
+    G.buildFS();
+  };
 })(window.G);

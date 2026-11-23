@@ -1,7 +1,7 @@
 {
   "name": "after-sign-off",
   "productName": "After Sign-Off",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "An analog horror game disguised as an old operating system.",
   "main": "electron/main.js",
   "private": true,
@@ -11,7 +11,8 @@
     "serve": "python3 -m http.server 8080 --directory src",
     "photos": "python3 tools/gen_photos.py",
     "dist": "electron-builder --win --publish never",
-    "dist:portable": "electron-builder --win portable --publish never"
+    "dist:portable": "electron-builder --win portable --publish never",
+    "i18n:check": "node tools/check_i18n.js"
   },
   "devDependencies": {
     "electron": "45.2.3",

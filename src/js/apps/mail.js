@@ -2,12 +2,12 @@
 (function (G) {
   'use strict';
   const U = G.util;
+  const t = G.t;
 
-  const FOLDERS = [
-    ['inbox', 'Inbox'], ['outbox', 'Outbox'], ['sent', 'Sent Items'], ['deleted', 'Deleted Items'], ['drafts', 'Drafts']
-  ];
+  const FOLDERS = ['inbox', 'outbox', 'sent', 'deleted', 'drafts'];
   const val = (v) => U.fill(typeof v === 'function' ? v() : v);
   const shortFrom = (s) => String(s).replace(/\s*<.*>/, '');
+  const when = (m) => U.parseStamp(m.date) || new Date(0);
 
   // Old messages Daniel never opened.
   const UNREAD_AT_START = { m_lily2: true };
@@ -31,7 +31,7 @@
       G.emit('mail:arrived', id);
       const m = G.mail.find((x) => x.id === id);
       if (opts.balloon !== false && m) {
-        G.dialogs.balloon({ title: 'Meridian Mail', icon: 'info', text: 'You have a new message.\nFrom: ' + shortFrom(val(m.from)) + '\n' + val(m.subject), onclick: () => G.apps.launch('mail', { open: id }) });
+        G.dialogs.balloon({ title: t('app.mail'), icon: 'info', text: t('ml.balloon', { from: shortFrom(val(m.from)), subject: val(m.subject) }), onclick: () => G.apps.launch('mail', { open: id }) });
       }
     }
   };
@@ -48,24 +48,24 @@
     const preview = U.el('div', { class: 'ml-preview' });
 
     const tb = (icon, label, fn) => U.el('button', { class: 'ml-tbtn', onclick: fn }, U.el('span', { html: G.icon(icon, 24) }), U.el('span', null, label));
-    const noConn = () => G.dialogs.msg({ title: 'Meridian Mail', icon: 'error', text: 'The host \'smtp.valleynet.com\' could not be found.\n\nAccount: valleynet\nServer Error: 0x800CCC0D' });
+    const noConn = () => G.dialogs.msg({ title: t('app.mail'), icon: 'error', text: t('ml.noConn') });
     const toolbar = U.el('div', { class: 'ml-toolbar' },
-      tb('eml', 'Create Mail', noConn),
-      tb('mail', 'Reply', () => (current ? noConn() : null)),
-      tb('mail', 'Forward', () => (current ? noConn() : null)),
+      tb('eml', t('ml.create'), noConn),
+      tb('mail', t('ml.reply'), () => (current ? noConn() : null)),
+      tb('mail', t('ml.forward'), () => (current ? noConn() : null)),
       U.el('span', { class: 'tsep' }),
-      tb('error', 'Delete', () => G.dialogs.msg({ title: 'Meridian Mail', icon: 'warn', text: 'Messages cannot be deleted while the mailbox is being backed up.' })),
-      tb('backup', 'Send/Recv', () => sendRecv()));
+      tb('error', t('ml.delete'), () => G.dialogs.msg({ title: t('app.mail'), icon: 'warn', text: t('ml.deleteErr') })),
+      tb('backup', t('ml.sendrecv'), () => sendRecv()));
 
     const w = G.wm.open({
-      key: 'mail', title: 'Inbox - Meridian Mail', icon: 'mail', w: 780, h: 520, status: ' ',
+      key: 'mail', title: t('ml.title', { folder: t('ml.inbox') }), icon: 'mail', w: 780, h: 520, status: ' ',
       menu: [
-        { label: 'File', items: [{ label: 'Close', action: () => w.close() }] },
-        { label: 'Edit', items: [{ label: 'Find...', disabled: true }] },
-        { label: 'View', items: [{ label: 'Refresh', action: () => renderAll() }] },
-        { label: 'Tools', items: [{ label: 'Send and Receive', action: () => sendRecv() }] },
-        { label: 'Message', items: [{ label: 'New Message', action: noConn }] },
-        { label: 'Help', items: [{ label: 'About Meridian Mail', action: () => G.apps.launch('about') }] }
+        { label: t('menu.file'), items: [{ label: t('menu.close'), action: () => w.close() }] },
+        { label: t('menu.edit'), items: [{ label: t('menu.find'), disabled: true }] },
+        { label: t('menu.view'), items: [{ label: t('menu.refresh'), action: () => renderAll() }] },
+        { label: t('menu.tools'), items: [{ label: t('menu.sendRecv'), action: () => sendRecv() }] },
+        { label: t('menu.message'), items: [{ label: t('menu.newMessage'), action: noConn }] },
+        { label: t('menu.help'), items: [{ label: t('menu.aboutMail'), action: () => G.apps.launch('about') }] }
       ],
       toolbar,
       bodyClass: 'ml-body'
@@ -78,27 +78,25 @@
 
     async function sendRecv() {
       G.cursor.busy(1500);
-      w.setStatus('Connecting to pop.valleynet.com...');
+      w.setStatus(t('ml.connecting'));
       G.audio.play('hdd');
       await U.sleep(1400);
       const before = Object.keys(G.state.mailArrived).length;
       G.emit('mail:sendrecv');
       await U.sleep(200);
-      if (Object.keys(G.state.mailArrived).length > before) { w.setStatus('1 new message received.'); return; }
-      w.setStatus('Error');
-      G.dialogs.msg({ title: 'Meridian Mail', icon: 'error', text: G.state.level >= 3
-        ? 'Receiving from 3:33 ... OK\n\nThere are no new messages. Everyone you know has already written.'
-        : 'Unable to connect to the server.\n\nThe host \'pop.valleynet.com\' could not be found.\n\nError Number: 0x800CCC0D' });
+      if (Object.keys(G.state.mailArrived).length > before) { w.setStatus(t('ml.newMsg')); return; }
+      w.setStatus(t('ml.error'));
+      G.dialogs.msg({ title: t('app.mail'), icon: 'error', text: G.state.level >= 3 ? t('ml.err3') : t('ml.err') });
     }
 
     function renderFolders() {
       folderList.innerHTML = '';
-      folderList.appendChild(U.el('div', { class: 'ml-fhead' }, 'Folders'));
-      folderList.appendChild(U.el('div', { class: 'ml-froot' }, U.el('span', { html: G.icon('mail', 16) }), 'Local Folders'));
-      FOLDERS.forEach(([id, label]) => {
+      folderList.appendChild(U.el('div', { class: 'ml-fhead' }, t('ml.folders')));
+      folderList.appendChild(U.el('div', { class: 'ml-froot' }, U.el('span', { html: G.icon('mail', 16) }), t('ml.local')));
+      FOLDERS.forEach((id) => {
         const unread = id === 'inbox' ? MAIL.unreadCount() : 0;
         const f = U.el('div', { class: 'ml-folder' + (id === folder ? ' sel' : '') + (unread ? ' bold' : '') },
-          U.el('span', { html: G.icon('folder', 16) }), label + (unread ? ' (' + unread + ')' : ''));
+          U.el('span', { html: G.icon('folder', 16) }), t('ml.' + id) + (unread ? ' (' + unread + ')' : ''));
         f.addEventListener('click', () => { folder = id; current = null; renderAll(); });
         folderList.appendChild(f);
       });
@@ -106,30 +104,31 @@
 
     function renderList() {
       table.innerHTML = '';
-      table.appendChild(U.el('div', { class: 'ml-row ml-hrow' }, U.el('span', { class: 'c-from' }, folder === 'sent' || folder === 'drafts' ? 'To' : 'From'), U.el('span', { class: 'c-subj' }, 'Subject'), U.el('span', { class: 'c-date' }, 'Received')));
+      const outgoing = folder === 'sent' || folder === 'drafts';
+      table.appendChild(U.el('div', { class: 'ml-row ml-hrow' }, U.el('span', { class: 'c-from' }, outgoing ? t('ml.to') : t('ml.from')), U.el('span', { class: 'c-subj' }, t('ml.subject')), U.el('span', { class: 'c-date' }, t('ml.received'))));
       const msgs = MAIL.visible().filter((m) => m.folder === folder);
-      msgs.sort((a, b) => (G.state.mailArrived[b.id] || 0) - (G.state.mailArrived[a.id] || 0) || new Date(val(b.date)) - new Date(val(a.date)));
-      if (!msgs.length) table.appendChild(U.el('div', { class: 'ml-empty' }, 'There are no items in this view.'));
+      msgs.sort((a, b) => (G.state.mailArrived[b.id] || 0) - (G.state.mailArrived[a.id] || 0) || when(b) - when(a));
+      if (!msgs.length) table.appendChild(U.el('div', { class: 'ml-empty' }, t('ml.empty')));
       msgs.forEach((m) => {
         const r = U.el('div', { class: 'ml-row' + (isUnread(m) ? ' unread' : '') + (current === m ? ' sel' : '') },
-          U.el('span', { class: 'c-from' }, U.el('span', { class: 'ml-env', html: G.icon('eml', 16) }), shortFrom(val(folder === 'sent' || folder === 'drafts' ? m.to : m.from))),
+          U.el('span', { class: 'c-from' }, U.el('span', { class: 'ml-env', html: G.icon('eml', 16) }), shortFrom(val(outgoing ? m.to : m.from))),
           U.el('span', { class: 'c-subj' }, val(m.subject)),
-          U.el('span', { class: 'c-date' }, val(m.date)));
+          U.el('span', { class: 'c-date' }, U.stamp(m.date)));
         r.addEventListener('click', () => select(m));
         table.appendChild(r);
       });
-      w.setStatus(msgs.length + ' message(s), ' + MAIL.unreadCount() + ' unread' + (G.state.level >= 1 ? '        Working Offline' : '        Working Offline'));
+      w.setStatus(t('ml.status', { n: msgs.length, u: MAIL.unreadCount() }) + '        ' + t('ml.offline'));
     }
 
     function renderPreview() {
       preview.innerHTML = '';
-      if (!current) { preview.appendChild(U.el('div', { class: 'ml-noprev' }, 'Select a message to read it.')); return; }
+      if (!current) { preview.appendChild(U.el('div', { class: 'ml-noprev' }, t('ml.select'))); return; }
       const m = current;
       preview.appendChild(U.el('div', { class: 'ml-head' },
-        U.el('div', null, U.el('b', null, 'From: '), val(m.from)),
-        U.el('div', null, U.el('b', null, 'Date: '), val(m.date)),
-        U.el('div', null, U.el('b', null, 'To: '), val(m.to)),
-        U.el('div', null, U.el('b', null, 'Subject: '), val(m.subject))));
+        U.el('div', null, U.el('b', null, t('ml.from') + ': '), val(m.from)),
+        U.el('div', null, U.el('b', null, t('ml.date') + ': '), U.stamp(m.date)),
+        U.el('div', null, U.el('b', null, t('ml.to') + ': '), val(m.to)),
+        U.el('div', null, U.el('b', null, t('ml.subject') + ': '), val(m.subject))));
       preview.appendChild(U.el('div', { class: 'ml-text' }, val(m.body)));
     }
 
@@ -144,7 +143,7 @@
     }
 
     function renderAll() {
-      w.setTitle(FOLDERS.find((f) => f[0] === folder)[1] + ' - Meridian Mail');
+      w.setTitle(t('ml.title', { folder: t('ml.' + folder) }));
       renderFolders();
       renderList();
       renderPreview();

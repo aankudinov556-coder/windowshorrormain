@@ -2,13 +2,14 @@
 (function (G) {
   'use strict';
   const U = G.util;
+  const t = G.t;
 
   G.apps = {
     reg: {},
     register(name, fn) { G.apps.reg[name] = fn; },
     launch(name, args = {}) {
       const fn = G.apps.reg[name];
-      if (!fn) { G.dialogs.msg({ title: 'Meridian', icon: 'error', text: 'Meridian cannot find \'' + name + '\'.' }); return null; }
+      if (!fn) { G.dialogs.msg({ title: 'Meridian', icon: 'error', text: t('run.notFound', { v: name }) }); return null; }
       G.cursor.busy(400);
       G.emit('app:launch', { name, args });
       return fn(args);
@@ -39,15 +40,15 @@
 
     const addrIcon = U.el('span', { class: 'addr-ico' });
     const addrText = U.el('span', { class: 'addr-text' });
-    const backBtn = U.el('button', { class: 'tbtn' }, U.el('span', { class: 'arrow-ico back' }), 'Back');
+    const backBtn = U.el('button', { class: 'tbtn' }, U.el('span', { class: 'arrow-ico back' }), t('ex.back'));
     const fwdBtn = U.el('button', { class: 'tbtn' }, U.el('span', { class: 'arrow-ico fwd' }));
-    const upBtn = U.el('button', { class: 'tbtn', title: 'Up' }, U.el('span', { class: 'up-ico', html: G.icon('folderOpen', 20) }));
+    const upBtn = U.el('button', { class: 'tbtn', title: t('ex.up') }, U.el('span', { class: 'up-ico', html: G.icon('folderOpen', 20) }));
     const toolbar = U.el('div', { class: 'ex-toolbars' },
       U.el('div', { class: 'ex-toolbar' }, backBtn, fwdBtn, upBtn,
         U.el('span', { class: 'tsep' }),
-        U.el('button', { class: 'tbtn', onclick: () => G.apps.launch('search') }, U.el('span', { html: G.icon('search', 20) }), 'Search'),
-        U.el('button', { class: 'tbtn' }, U.el('span', { html: G.icon('folder', 20) }), 'Folders')),
-      U.el('div', { class: 'ex-address' }, U.el('span', { class: 'addr-label' }, 'Address'), U.el('div', { class: 'addr-box' }, addrIcon, addrText, U.el('span', { class: 'addr-drop' }, '▾')), U.el('button', { class: 'tbtn go' }, '➜ Go')));
+        U.el('button', { class: 'tbtn', onclick: () => G.apps.launch('search') }, U.el('span', { html: G.icon('search', 20) }), t('app.search')),
+        U.el('button', { class: 'tbtn' }, U.el('span', { html: G.icon('folder', 20) }), t('ex.folders'))),
+      U.el('div', { class: 'ex-address' }, U.el('span', { class: 'addr-label' }, t('ex.address')), U.el('div', { class: 'addr-box' }, addrIcon, addrText, U.el('span', { class: 'addr-drop' }, '▾')), U.el('button', { class: 'tbtn go' }, '➜ ' + t('ex.go'))));
 
     const tasks = U.el('div', { class: 'ex-tasks' });
     const list = U.el('div', { class: 'ex-list' });
@@ -55,12 +56,12 @@
     const w = G.wm.open({
       title: G.fs.label(node), icon: folderIcon(node), w: 640, h: 440, status: ' ',
       menu: [
-        { label: 'File', items: () => [{ label: 'Open', disabled: !selected, action: () => selected && openNode(selected) }, { sep: true }, { label: 'Close', action: () => w.close() }] },
-        { label: 'Edit', items: [{ label: 'Select All', disabled: true }] },
-        { label: 'View', items: [{ label: 'Refresh', action: () => render() }] },
-        { label: 'Favorites', items: [{ label: '(empty)', disabled: true }] },
-        { label: 'Tools', items: [{ label: 'Folder Options...', disabled: true }] },
-        { label: 'Help', items: [{ label: 'About Meridian', action: () => G.apps.launch('about') }] }
+        { label: t('menu.file'), items: () => [{ label: t('menu.open'), disabled: !selected, action: () => selected && openNode(selected) }, { sep: true }, { label: t('menu.close'), action: () => w.close() }] },
+        { label: t('menu.edit'), items: [{ label: t('menu.selectAll'), disabled: true }] },
+        { label: t('menu.view'), items: [{ label: t('menu.refresh'), action: () => render() }] },
+        { label: t('menu.favorites'), items: [{ label: t('menu.empty'), disabled: true }] },
+        { label: t('menu.tools'), items: [{ label: t('menu.folderOptions'), disabled: true }] },
+        { label: t('menu.help'), items: [{ label: t('menu.about'), action: () => G.apps.launch('about') }] }
       ],
       toolbar,
       bodyClass: 'ex-body'
@@ -101,8 +102,8 @@
     }
 
     async function restorePrompt(n) {
-      const r = await G.dialogs.msg({ title: 'Recycle Bin', icon: 'question', text: '"' + n.name + '" is in the Recycle Bin.\n\nDo you want to restore it to its original location?', buttons: ['Restore', 'Cancel'] });
-      if (r !== 'Restore') return;
+      const r = await G.dialogs.msg({ title: t('fs.recycle'), icon: 'question', text: t('ex.restoreQ', { name: n.name }), buttons: [t('ex.restoreBtn'), t('common.cancel')] });
+      if (r !== t('ex.restoreBtn')) return;
       G.state.restored[n.id] = true;
       G.save();
       G.audio.play('click');
@@ -119,33 +120,33 @@
       tasks.innerHTML = '';
       const rows = [];
       if (node.id === 'recycle') {
-        rows.push(U.el('div', { class: 'tk-link', onclick: () => { if (selected) restorePrompt(selected); else G.dialogs.msg({ title: 'Recycle Bin', icon: 'info', text: 'Select an item to restore it.' }); } }, U.el('span', { html: G.icon('folderOpen', 16) }), 'Restore this item'));
-        rows.push(U.el('div', { class: 'tk-link', onclick: () => G.dialogs.msg({ title: 'Recycle Bin', icon: 'error', text: 'Cannot empty the Recycle Bin: the disk is write-protected.' }) }, U.el('span', { html: G.icon('binEmpty', 16) }), 'Empty the Recycle Bin'));
-        tasks.appendChild(taskBox('Recycle Bin Tasks', rows));
+        rows.push(U.el('div', { class: 'tk-link', onclick: () => { if (selected) restorePrompt(selected); else G.dialogs.msg({ title: t('fs.recycle'), icon: 'info', text: t('ex.selectToRestore') }); } }, U.el('span', { html: G.icon('folderOpen', 16) }), t('ex.restoreItem')));
+        rows.push(U.el('div', { class: 'tk-link', onclick: () => G.dialogs.msg({ title: t('fs.recycle'), icon: 'error', text: t('ex.emptyBinErr') }) }, U.el('span', { html: G.icon('binEmpty', 16) }), t('ex.emptyBin')));
+        tasks.appendChild(taskBox(t('ex.binTasks'), rows));
       } else if (node.id === 'mycomputer') {
-        rows.push(U.el('div', { class: 'tk-link', onclick: () => G.apps.launch('sysinfo') }, U.el('span', { html: G.icon('info', 16) }), 'View system information'));
-        rows.push(U.el('div', { class: 'tk-link', onclick: () => G.apps.launch('control') }, U.el('span', { html: G.icon('control', 16) }), 'Change a setting'));
-        tasks.appendChild(taskBox('System Tasks', rows));
+        rows.push(U.el('div', { class: 'tk-link', onclick: () => G.apps.launch('sysinfo') }, U.el('span', { html: G.icon('info', 16) }), t('ex.sysInfo')));
+        rows.push(U.el('div', { class: 'tk-link', onclick: () => G.apps.launch('control') }, U.el('span', { html: G.icon('control', 16) }), t('ex.changeSetting')));
+        tasks.appendChild(taskBox(t('ex.sysTasks'), rows));
       } else {
-        rows.push(U.el('div', { class: 'tk-link dis' }, U.el('span', { html: G.icon('folder', 16) }), 'Make a new folder'));
-        rows.push(U.el('div', { class: 'tk-link dis' }, U.el('span', { html: G.icon('web', 16) }), 'Publish this folder to the Web'));
-        tasks.appendChild(taskBox('File and Folder Tasks', rows));
+        rows.push(U.el('div', { class: 'tk-link dis' }, U.el('span', { html: G.icon('folder', 16) }), t('ex.newFolder')));
+        rows.push(U.el('div', { class: 'tk-link dis' }, U.el('span', { html: G.icon('web', 16) }), t('ex.publish')));
+        tasks.appendChild(taskBox(t('ex.fileTasks'), rows));
       }
-      const places = (OTHER_PLACES[node.id] || OTHER_PLACES._default).map((id) => {
+      const placeIds = OTHER_PLACES[node.id] || OTHER_PLACES._default;
+      const places = placeIds.map((id) => {
         const p = G.fs.byId(id);
         return U.el('div', { class: 'tk-link', onclick: () => navigate(p) }, U.el('span', { html: G.icon(G.fs.icon(p), 16) }), G.fs.label(p));
       });
-      const placeIds = OTHER_PLACES[node.id] || OTHER_PLACES._default;
       if (node.parent && node.parent.id !== 'root' && !OTHER_PLACES[node.id] && !placeIds.includes(node.parent.id)) {
         places.unshift(U.el('div', { class: 'tk-link', onclick: () => navigate(node.parent) }, U.el('span', { html: G.icon(folderIcon(node.parent), 16) }), G.fs.label(node.parent)));
       }
-      tasks.appendChild(taskBox('Other Places', places));
+      tasks.appendChild(taskBox(t('ex.otherPlaces'), places));
       const d = selected || node;
       const details = [U.el('b', null, G.fs.label(d)), U.el('div', null, G.fs.typeName(d))];
-      if (d.date) details.push(U.el('div', null, 'Date Modified: ' + U.fill(d.date)));
-      if (d.size) details.push(U.el('div', null, 'Size: ' + d.size));
+      if (d.date) details.push(U.el('div', null, t('ex.dateMod', { v: U.stamp(d.date) })));
+      if (d.size) details.push(U.el('div', null, t('ex.size', { v: G.fs.size(d) })));
       if (d.free) details.push(U.el('div', null, d.free));
-      tasks.appendChild(taskBox('Details', [U.el('div', { class: 'tk-details' }, details)]));
+      tasks.appendChild(taskBox(t('ex.details'), [U.el('div', { class: 'tk-details' }, details)]));
     }
 
     function render() {
@@ -158,14 +159,14 @@
       fwdBtn.disabled = !fwd.length;
       list.innerHTML = '';
       if (node.locked && !G.state.unlocked[node.id]) {
-        list.appendChild(U.el('div', { class: 'ex-empty' }, 'This folder is password protected.'));
+        list.appendChild(U.el('div', { class: 'ex-empty' }, t('ex.locked')));
         renderTasks();
         return;
       }
       const kids = G.fs.children(node);
       const tiles = node.id === 'mycomputer';
       list.classList.toggle('tiles', tiles);
-      if (!kids.length) list.appendChild(U.el('div', { class: 'ex-empty' }, node.emptyText || 'This folder is empty.'));
+      if (!kids.length) list.appendChild(U.el('div', { class: 'ex-empty' }, node.emptyText || t('fs.emptyFolder')));
       kids.forEach((k) => {
         const label = G.fs.label(k);
         const item = U.el('div', { class: 'ex-item', tabindex: '0' },
@@ -176,13 +177,13 @@
           item.classList.add('sel');
           selected = k;
           renderTasks();
-          w.setStatus('Type: ' + G.fs.typeName(k) + (k.date ? '   Date Modified: ' + U.fill(k.date) : '') + (k.size ? '   Size: ' + k.size : ''));
+          w.setStatus(t('ex.statusType', { v: G.fs.typeName(k) }) + (k.date ? '   ' + t('ex.dateMod', { v: U.stamp(k.date) }) : '') + (k.size ? '   ' + t('ex.size', { v: G.fs.size(k) }) : ''));
         });
         item.addEventListener('dblclick', () => openNode(k));
         item.addEventListener('keydown', (e) => { if (e.key === 'Enter') openNode(k); });
         list.appendChild(item);
       });
-      w.setStatus(kids.length + ' object(s)' + (L >= 3 && node.id === 'mydocs' ? '   (+1 watching)' : ''));
+      w.setStatus(t('ex.objects', { n: kids.length }) + (L >= 3 && node.id === 'mydocs' ? '   ' + t('ex.watching') : ''));
       renderTasks();
       if (L >= 2 && U.chance(0.12 * L)) setTimeout(() => G.fx.corruptText(list, 500, 0.3), U.randi(300, 1500));
     }
@@ -202,8 +203,8 @@
   // Password prompt for protected folders.
   G.apps.unlock = async function (n) {
     G.state.flags.unlockTries = G.state.flags.unlockTries || 0;
-    const hint = G.state.flags.unlockTries >= 2 ? '\nHint (set by Daniel): "the usual one — ask Ruth"' : '';
-    const pw = await G.dialogs.prompt({ title: 'Protected Folder', icon: 'lockedFolder', text: '"' + n.name + '" is password protected.' + hint, label: 'Password:', password: true });
+    const hint = G.state.flags.unlockTries >= 2 ? '\n' + t('pw.hint') : '';
+    const pw = await G.dialogs.prompt({ title: t('pw.title'), icon: 'lockedFolder', text: t('pw.text', { name: n.name }) + hint, label: t('pw.label'), password: true });
     if (pw == null) return false;
     if (pw.replace(/\s/g, '') === n.locked || pw.replace(/[\s.,]/g, '') === n.locked) {
       G.state.unlocked[n.id] = true;
@@ -215,7 +216,7 @@
     }
     G.state.flags.unlockTries++;
     G.save();
-    await G.dialogs.msg({ title: 'Protected Folder', icon: 'error', text: 'The password is incorrect.' });
+    await G.dialogs.msg({ title: t('pw.title'), icon: 'error', text: t('pw.wrong') });
     return false;
   };
 })(window.G);

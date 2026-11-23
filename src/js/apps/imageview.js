@@ -2,8 +2,10 @@
 (function (G) {
   'use strict';
   const U = G.util;
+  const t = G.t;
 
-  function srcOf(n) { return typeof n.src === 'function' ? 'assets/img/' + n.src(G.state) : n.src; }
+  // Pictures go through the asset lookup, so a language can override any image.
+  function srcOf(n) { return G.i18n.asset('img/' + (typeof n.src === 'function' ? n.src(G.state) : n.src)); }
 
   G.apps.register('imageview', (args) => {
     let node = args.node;
@@ -11,19 +13,19 @@
     const img = U.el('img', { class: 'iv-img', draggable: 'false', alt: '' });
     const veil = U.el('div', { class: 'iv-veil' });
     const frame = U.el('div', { class: 'iv-frame' }, img, veil);
-    const stage = U.el('div', { class: 'iv-stage' }, frame);
+    const stage = U.el('div', { class: 'iv-stage' }, frame, U.el('div', { class: 'iv-nopreview' }, t('iv.noPreview')));
     const btn = (label, fn, title) => U.el('button', { class: 'iv-btn', title: title || '', onclick: fn }, label);
     const bar = U.el('div', { class: 'iv-bar' },
-      btn('◀', () => step(-1), 'Previous Image'),
-      btn('▶', () => step(1), 'Next Image'),
+      btn('◀', () => step(-1), t('iv.prev')),
+      btn('▶', () => step(1), t('iv.next')),
       U.el('span', { class: 'tsep' }),
-      btn('⊕', () => zoom(1.25), 'Zoom In'),
-      btn('⊖', () => zoom(0.8), 'Zoom Out'),
-      btn('1:1', () => zoom(0), 'Actual Size'));
+      btn('⊕', () => zoom(1.25), t('iv.zoomIn')),
+      btn('⊖', () => zoom(0.8), t('iv.zoomOut')),
+      btn('1:1', () => zoom(0), t('iv.actual')));
     let scale = 1;
 
     const w = G.wm.open({
-      key: 'imageview', title: node.name + ' - Picture Viewer', icon: 'img', w: 600, h: 520, bodyClass: 'iv-body'
+      key: 'imageview', title: t('iv.title', { name: node.name }), icon: 'img', w: 600, h: 520, bodyClass: 'iv-body'
     });
     w.body.innerHTML = '';
     w.body.appendChild(stage);
@@ -46,7 +48,7 @@
     }
 
     function show() {
-      w.setTitle(node.name + ' - Picture Viewer');
+      w.setTitle(t('iv.title', { name: node.name }));
       scale = 1;
       frame.style.transform = '';
       const slow = 600 + G.state.level * 500 + (node.slow ? 2000 : 0);

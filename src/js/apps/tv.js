@@ -2,7 +2,9 @@
 (function (G) {
   'use strict';
   const U = G.util;
+  const t = G.t;
   const W = 320, H = 240;
+  const titleOf = (tp) => (typeof tp.title === 'function' ? tp.title() : tp.title);
 
   function tapeNodes() {
     return G.fs.children(G.fs.byId('drive_d')).filter((n) => n.kind === 'mpg');
@@ -28,20 +30,20 @@
     const lcd = U.el('div', { class: 'tv-lcd' }, 'CH 12');
     const status = U.el('div', { class: 'tv-status' }, '');
     const select = U.el('select', { class: 'tv-select' });
-    const playBtn = U.el('button', { class: 'tv-btn', title: 'Play/Pause' }, '▶');
+    const playBtn = U.el('button', { class: 'tv-btn', title: t('tv.play') }, '▶');
     const ctrl = U.el('div', { class: 'tv-controls' },
-      U.el('button', { class: 'tv-btn', title: 'Rewind', onclick: () => seek(-10) }, '◀◀'),
+      U.el('button', { class: 'tv-btn', title: t('tv.rewind'), onclick: () => seek(-10) }, '◀◀'),
       playBtn,
-      U.el('button', { class: 'tv-btn', title: 'Stop', onclick: () => stopTape(true) }, '■'),
-      U.el('button', { class: 'tv-btn', title: 'Fast Forward', onclick: () => seek(10) }, '▶▶'),
+      U.el('button', { class: 'tv-btn', title: t('tv.stop'), onclick: () => stopTape(true) }, '■'),
+      U.el('button', { class: 'tv-btn', title: t('tv.ff'), onclick: () => seek(10) }, '▶▶'),
       U.el('span', { class: 'tsep' }),
-      U.el('button', { class: 'tv-btn', title: 'Channel Down', onclick: () => tune(-1) }, 'CH▼'),
-      U.el('button', { class: 'tv-btn', title: 'Channel Up', onclick: () => tune(1) }, 'CH▲'),
+      U.el('button', { class: 'tv-btn', title: t('tv.chDown'), onclick: () => tune(-1) }, 'CH▼'),
+      U.el('button', { class: 'tv-btn', title: t('tv.chUp'), onclick: () => tune(1) }, 'CH▲'),
       lcd);
-    const side = U.el('div', { class: 'tv-side' }, U.el('label', null, 'Source:'), select);
+    const side = U.el('div', { class: 'tv-side' }, U.el('label', null, t('tv.source')), select);
 
     const w = G.wm.open({
-      key: 'tv', title: 'Meridian TV', icon: G.state.level >= 3 ? 'tvLive' : 'tv', w: 520, h: 478, resizable: false, x: args.x, y: args.y,
+      key: 'tv', title: t('app.tv'), icon: G.state.level >= 3 ? 'tvLive' : 'tv', w: 520, h: 478, resizable: false, x: args.x, y: args.y,
       bodyClass: 'tv-body',
       onClose: () => cleanup()
     });
@@ -68,9 +70,11 @@
       sound(h) { if (h) sounds.push(h); return h; },
       hiss() { return player.sound(G.audio.hiss(0.06)); },
       later(ms, fn) { timers.push(setTimeout(() => { if (!w.closed && mode === 'tape') fn(); }, ms)); },
-      say(text, o = {}) {
-        if (!o.noCaption) player.caption(o.caption || text, 1500 + text.length * 70 / (o.rate || 0.85));
-        G.audio.speak(text, o);
+      // key: language pack line. Captions show it unless noCaption (on-screen text already says it).
+      say(key, o = {}) {
+        const text = U.fill(t(key));
+        if (!o.noCaption) player.caption(o.caption ? t(o.caption) : text, 1500 + text.length * 70 / (o.rate || 0.85));
+        G.audio.voice(key, text, o);
       },
       caption(text, ms) {
         caption.textContent = U.fill(text);
@@ -91,7 +95,7 @@
 
     function populate() {
       select.innerHTML = '';
-      select.appendChild(U.el('option', { value: '' }, '— Live TV (Antenna) —'));
+      select.appendChild(U.el('option', { value: '' }, t('tv.live')));
       tapeNodes().forEach((n) => select.appendChild(U.el('option', { value: n.tape }, n.name)));
       select.value = mode === 'tape' && tapeId ? tapeId : '';
     }
@@ -114,17 +118,14 @@
       liveHiss = G.audio.hiss(channel === 12 && G.state.level >= 2 ? 0.02 : 0.06);
       lcd.textContent = 'CH ' + U.pad(channel);
       osdUntil = performance.now() + 2500;
-      status.textContent = channel === 12 ? statusFor12() : 'Channel ' + channel + ' — No signal';
+      status.textContent = channel === 12 ? statusFor12() : t('tv.noSignal', { n: channel });
       populate();
       G.emit('tv:tune', channel);
     }
 
     function statusFor12() {
       const L = G.state.level;
-      if (L <= 1) return 'Channel 12 — Weak signal (station off the air since 10/2003)';
-      if (L === 2) return 'Channel 12 — Signal found. Waiting for program...';
-      if (L === 3) return 'Channel 12 — LIVE';
-      return 'Channel 12 — LIVE — Tonight\'s guest';
+      return t('tv.ch12_' + Math.min(L <= 1 ? 1 : L, 4));
     }
 
     function tune(d) {
@@ -138,12 +139,12 @@
 
     // ---------------- tape playback ----------------
     function playTape(id) {
-      const t = G.tapes[id];
-      if (!t) return;
+      const tp = G.tapes[id];
+      if (!tp) return;
       clearSceneMedia();
       stopLiveHiss();
       G.audio.stopSpeech();
-      tape = t;
+      tape = tp;
       tapeId = id;
       mode = 'tape';
       paused = false;
@@ -152,14 +153,14 @@
       tapeTime = 0;
       osdUntil = performance.now() + 4000;
       lcd.textContent = 'PLAY';
-      status.textContent = t.title;
-      w.setTitle(t.title.split(' — ').slice(0, 2).join(' — ') + ' - Meridian TV');
+      status.textContent = titleOf(tp);
+      w.setTitle(titleOf(tp).split(' — ').slice(0, 2).join(' — ') + ' - ' + G.t('app.tv'));
       G.audio.duckAmbient(true);
       populate();
       G.emit('tape:start', id);
     }
 
-    function totalDur(t) { return t.scenes.reduce((a, s) => a + s.d, 0); }
+    function totalDur(tp) { return tp.scenes.reduce((a, s) => a + s.d, 0); }
 
     function seek(d) {
       if (mode !== 'tape') return;
@@ -179,14 +180,14 @@
       lcd.textContent = 'STOP';
       playBtn.textContent = '▶';
       G.audio.duckAmbient(false);
-      w.setTitle('Meridian TV');
-      if (user) status.textContent = 'Stopped.';
+      w.setTitle(G.t('app.tv'));
+      if (user) status.textContent = G.t('tv.stopped');
     }
 
     function tapeFinished() {
       const id = tapeId;
       stopTape(false);
-      status.textContent = 'End of recording.';
+      status.textContent = G.t('tv.end');
       G.state.watched[id] = true;
       G.save();
       G.emit('tape:watched', id);

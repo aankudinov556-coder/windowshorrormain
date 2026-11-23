@@ -2,6 +2,7 @@
 (function (G) {
   'use strict';
   const U = G.util;
+  const t = G.t;
 
   const SCREEN_W = 1024;
   const DESK_H = 738; // 768 minus taskbar
@@ -51,9 +52,9 @@
       y = U.clamp(y, 0, DESK_H - 40);
 
       const btns = U.el('div', { class: 'wt-btns' });
-      if (o.minimizable !== false) btns.appendChild(U.el('button', { class: 'wt-btn wt-min', title: 'Minimize', onclick: (e) => { e.stopPropagation(); w.minimize(); } }));
-      if (o.maximizable !== false && o.resizable !== false) btns.appendChild(U.el('button', { class: 'wt-btn wt-max', title: 'Maximize', onclick: (e) => { e.stopPropagation(); w.toggleMax(); } }));
-      btns.appendChild(U.el('button', { class: 'wt-btn wt-close', title: 'Close', onclick: (e) => { e.stopPropagation(); G.audio.play('click'); w.close(); } }));
+      if (o.minimizable !== false) btns.appendChild(U.el('button', { class: 'wt-btn wt-min', title: t('wm.min'), onclick: (e) => { e.stopPropagation(); w.minimize(); } }));
+      if (o.maximizable !== false && o.resizable !== false) btns.appendChild(U.el('button', { class: 'wt-btn wt-max', title: t('wm.max'), onclick: (e) => { e.stopPropagation(); w.toggleMax(); } }));
+      btns.appendChild(U.el('button', { class: 'wt-btn wt-close', title: t('wm.close'), onclick: (e) => { e.stopPropagation(); G.audio.play('click'); w.close(); } }));
 
       w.titleText = U.el('span', { class: 'wt-text' }, o.title || '');
       w.titleIcon = U.el('span', { class: 'wt-icon', html: o.icon ? G.icon(o.icon, 16) : '' });
@@ -157,7 +158,7 @@
           const r = it.getBoundingClientRect();
           const p = G.toLocal(r.left, r.bottom);
           const list = typeof m.items === 'function' ? m.items(w) : m.items;
-          WM.showMenu(p.x, p.y, list || [{ label: '(empty)', disabled: true }]);
+          WM.showMenu(p.x, p.y, list || [{ label: t('menu.empty'), disabled: true }]);
         });
         bar.appendChild(it);
       });

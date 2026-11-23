@@ -2,14 +2,12 @@
 (function (G) {
   'use strict';
   const U = G.util;
+  const t = G.t;
 
   const DRIVES = { a: 'drive_a', c: 'drive_c', d: 'drive_d', e: 'drive_e' };
 
-  function docText(n) {
-    let d = n.doc ? G.docs[n.doc] : '';
-    if (typeof d === 'function') d = d(G.state);
-    return U.fill(d || '');
-  }
+  const docText = (n) => G.docText(n);
+  const lines = (key) => [].concat(t(key));
 
   function driveOf(n) {
     let x = n;
@@ -45,7 +43,7 @@
     const term = U.el('div', { class: 'cmd' }, outEl, line);
 
     const w = G.wm.open({
-      key: 'cmd', title: 'Command Prompt', icon: 'cmd', w: 640, h: 400, bodyClass: 'cmd-body',
+      key: 'cmd', title: t('app.cmd'), icon: 'cmd', w: 640, h: 400, bodyClass: 'cmd-body',
       onClose: () => { if (askResolve) askResolve(null); }
     });
     w.body.appendChild(term);
@@ -133,38 +131,39 @@
 
     function cmdDir(arg) {
       const n = arg ? resolve(arg) : cwd;
-      if (!n) return T.print('File Not Found');
+      if (!n) return T.print(t('cmd.fileNotFound'));
       if (!isDir(n)) return T.print(' ' + n.name);
-      if (locked(n)) return T.print('Access is denied.');
-      if (n.onOpen && n.type === 'drive') return T.print('The device is not ready.');
+      if (locked(n)) return T.print(t('cmd.access'));
+      if (n.onOpen && n.type === 'drive') return T.print(t('cmd.notReady'));
       const d = driveOf(n);
-      T.print(' Volume in drive ' + d.pathName[0] + (d.id === 'drive_e' ? ' is BYTELINE_BKP' : d.id === 'drive_d' ? ' is TV CAPTURE' : ' has no label.'));
-      T.print(' Volume Serial Number is 0333-0333');
+      const label = d.id === 'drive_e' ? 'BYTELINE_BKP' : d.id === 'drive_d' ? 'TV CAPTURE' : '';
+      T.print(label ? t('cmd.vol', { d: d.pathName[0], label }) : t('cmd.volNoLabel', { d: d.pathName[0] }));
+      T.print(t('cmd.serial'));
       T.print('');
-      T.print(' Directory of ' + G.fs.path(n));
+      T.print(t('cmd.dirOf', { path: G.fs.path(n) }));
       T.print('');
       let files = 0, dirs = 0;
       G.fs.children(n).forEach((k) => {
-        const date = U.fill(k.date || '06/02/2002 07:22 PM').replace(/^(\d+)\/(\d+)\/(\d+)/, (a, mo, da, y) => U.pad(mo) + '/' + U.pad(da) + '/' + y);
-        if (isDir(k)) { dirs++; T.print(date.padEnd(22) + '<DIR>'.padEnd(15) + k.name); } else { files++; T.print(date.padEnd(22) + String(k.size || '0').padStart(14) + ' ' + k.name); }
+        const date = U.stamp(k.date || '2002-06-02 19:22');
+        if (isDir(k)) { dirs++; T.print(date.padEnd(22) + '<DIR>'.padEnd(15) + k.name); } else { files++; T.print(date.padEnd(22) + G.fs.size(k).padStart(14) + ' ' + k.name); }
       });
-      T.print('               ' + files + ' File(s)');
-      T.print('               ' + dirs + ' Dir(s)   ' + (n.free || d.free || '1,288,490,188 bytes free'));
+      T.print(t('cmd.files', { n: files }));
+      T.print(t('cmd.dirs', { n: dirs, free: n.free || d.free || '' }));
     }
 
     function cmdCd(arg) {
       if (!arg) return T.print(G.fs.path(cwd));
       const n = resolve(arg);
-      if (!n || !isDir(n)) return T.print('The system cannot find the path specified.');
-      if (locked(n)) return T.print('Access is denied.');
-      if (n.id === 'drive_a') return T.print('The device is not ready.');
+      if (!n || !isDir(n)) return T.print(t('cmd.pathNotFound'));
+      if (locked(n)) return T.print(t('cmd.access'));
+      if (n.id === 'drive_a') return T.print(t('cmd.notReady'));
       cwd = n;
     }
 
     function cmdType(arg) {
       const n = resolve(arg);
-      if (!n) return T.print('The system cannot find the file specified.');
-      if (isDir(n)) return T.print('Access is denied.');
+      if (!n) return T.print(t('cmd.fileNotSpecified'));
+      if (isDir(n)) return T.print(t('cmd.access'));
       if (['txt', 'log', 'ini', 'bat'].includes(n.kind)) { docText(n).split('\n').forEach((l) => T.print(l)); G.state.opened[n.id] = (G.state.opened[n.id] || 0) + 1; G.emit('file:open', n); return; }
       T.print(garbage(6));
     }
@@ -178,15 +177,15 @@
 
     function cmdKill(argv) {
       const im = argv.join(' ').replace(/\/f|\/im|\/t/gi, '').trim().toLowerCase();
-      if (!im) return T.print('ERROR: Invalid syntax. Type "TASKKILL /?" for usage.');
+      if (!im) return T.print(t('cmd.killSyntax'));
       if (im.startsWith('host')) {
         G.emit('host:kill', 'cmd');
         const L = G.state.level;
-        if (L <= 1) return T.print('ERROR: The process "host.exe" could not be terminated.\nReason: Access is denied.');
-        if (L === 2) return T.print('ERROR: The process "host.exe" could not be terminated.\nReason: The process is a guest of this system.');
-        return T.host('you cannot end a program by closing your eyes, {user}.');
+        if (L <= 1) return T.print(t('cmd.killDenied', { name: 'host.exe' }));
+        if (L === 2) return T.print(t('cmd.killGuest'));
+        return T.host(t('cmd.killHost'));
       }
-      T.print('ERROR: The process "' + im + '" could not be terminated.\nReason: Access is denied.');
+      T.print(t('cmd.killDenied', { name: im }));
     }
 
     // ---------------- TXCTL ----------------
@@ -196,27 +195,21 @@
       if (sub === 'help' || sub === '/?') {
         T.print('TXCTL 2.1 — Remote Transmitter Control  (c) 1998 Burrell Broadcast Systems');
         T.print('');
-        ['  txctl status            Report transmitter status',
-          '  txctl anthem            Roll sign-off reel (station ID + anthem)',
-          '  txctl bars              Color bars + 1 kHz reference tone',
-          '  txctl visual on|off     Visual carrier on / off',
-          '  txctl aural on|off      Aural carrier on / off',
-          '  txctl sign              Sign the transmitter log',
-          '', 'Follow your station\'s written sign-off procedure.'].forEach((l) => T.print(l));
+        lines('cmd.txhelp').forEach((l) => T.print(l));
         return;
       }
       const L = G.state.level;
       T.lock(true);
-      await T.slow('Dialing RCU 555-0112 ...', '', 22);
+      await T.slow(t('cmd.dialing'), '', 22);
       G.audio.play('hdd');
       await U.sleep(1200);
       if (L < 4) {
-        T.print('NO DIALTONE');
-        if (L === 3) { await U.sleep(900); await T.host('...but something picked up anyway.'); await T.host('"not yet. you haven\'t met everyone yet."'); }
+        T.print(t('cmd.nodial'));
+        if (L === 3) { await U.sleep(900); for (const l of lines('cmd.nodial3')) await T.host(l); }
         T.lock(false);
         return;
       }
-      T.print('CONNECT 33600   RCU: HVB-12 PELL HILL', 'ok');
+      T.print(t('cmd.connect'), 'ok');
       await U.sleep(300);
       const step = sub + (arg2 ? ' ' + arg2 : '');
       await G.story.txctl(step, T);
@@ -237,19 +230,16 @@
       if (c === 'cd..') { c = 'cd'; parts.unshift('..'); }
       switch (c) {
         case 'help':
-          ['CD       Displays the name of or changes the current directory.', 'CLS      Clears the screen.', 'DIR      Displays a list of files and subdirectories in a directory.',
-            'ECHO     Displays messages.', 'EXIT     Quits the command interpreter.', 'START    Starts a program.', 'TASKLIST Displays all currently running tasks.',
-            'TASKKILL Kill or stop a running process.', 'TYPE     Displays the contents of a text file.', 'VER      Displays the Meridian version.', 'WHOAMI   Displays the current user.',
-            '', 'TXCTL    Burrell remote transmitter control (type TXCTL HELP).'].forEach((l) => T.print(l));
+          lines('cmd.help').forEach((l) => T.print(l));
           break;
         case 'dir': cmdDir(rest); break;
         case 'cd': case 'chdir': cmdCd(parts.join(' ')); break;
         case 'type': case 'more': cmdType(rest); break;
         case 'cls': T.clear(); break;
-        case 'echo': T.print(rest || 'ECHO is on.'); break;
-        case 'ver': T.print(''); T.print('Meridian 2002 [Version 5.1.2600]'); break;
-        case 'date': T.print('The current date is: ' + (G.state.level >= 4 ? 'Tue 10/14/2003' : new Date().toDateString())); break;
-        case 'time': T.print('The current time is: ' + (G.state.level >= 4 ? '3:33:00.00' : new Date().toLocaleTimeString())); break;
+        case 'echo': T.print(rest || t('cmd.echoOn')); break;
+        case 'ver': T.print(''); T.print(t('cmd.banner1')); break;
+        case 'date': T.print(t('cmd.date', { v: G.state.level >= 4 ? U.fmtDate(new Date(2003, 9, 14)) : U.fmtDate(new Date()) })); break;
+        case 'time': T.print(t('cmd.time', { v: G.state.level >= 4 ? '3:33:00.00' : new Date().toLocaleTimeString(G.i18n.lang) })); break;
         case 'whoami': T.print('meridian\\' + (G.state.level >= 4 ? 'host' : G.state.level === 3 ? G.userName.toLowerCase() : 'daniel')); break;
         case 'tasklist': cmdTasklist(); break;
         case 'taskkill': case 'kill': cmdKill(parts); break;
@@ -258,21 +248,21 @@
         case 'start': case 'notepad': case 'taskmgr': case 'explorer': {
           const name = (c === 'start' ? parts[0] || '' : c).toLowerCase().replace('.exe', '');
           const map = { notepad: 'notepad', taskmgr: 'taskmgr', explorer: 'explorer', mtv: 'tv', tv: 'tv', mmail: 'mail', mail: 'mail', backup: 'backup', cmd: 'cmd' };
-          if (map[name]) G.apps.launch(map[name], {}); else T.print('The system cannot find the file ' + name + '.');
+          if (map[name]) G.apps.launch(map[name], {}); else T.print(t('cmd.progNotFound', { name }));
           break;
         }
-        case 'ping': T.print(''); T.print('Ping request could not find host ' + (parts[0] || '') + '. Please check the name and try again.'); break;
-        case 'format': T.print(G.state.level >= 2 ? 'Access is denied. We live here.' : 'Access is denied. The disk is write-protected.'); break;
+        case 'ping': T.print(''); T.print(t('cmd.ping', { host: parts[0] || '' })); break;
+        case 'format': T.print(G.state.level >= 2 ? t('cmd.format2') : t('cmd.writeProt')); break;
         case 'del': case 'erase': case 'rd': case 'rmdir': case 'copy': case 'xcopy': case 'move': case 'ren':
-          T.print('Access is denied. The disk is write-protected.'); break;
+          T.print(t('cmd.writeProt')); break;
         case 'shutdown': G.boot.turnOffDialog(); break;
         case 'host': case 'host.exe': G.story.hostProgram(); break;
         default:
-          T.print("'" + c + "' is not recognized as an internal or external command,\noperable program or batch file.");
+          T.print(t('cmd.unknown', { c }));
       }
       if (G.state.level >= 3 && U.chance(0.12) && c !== 'txctl') {
         await U.sleep(500);
-        await T.host(U.pick(['who are you talking to?', 'we can hear you typing.', 'daniel used to type faster.', 'it\'s late, {user}.', 'keep going. we like this part.']));
+        await T.host(U.pick(lines('cmd.hostQuips')));
       }
     }
 
@@ -308,8 +298,8 @@
       if (!w.closed && !askResolve) { resetPrompt(); T.lock(false); }
     };
 
-    T.print('Meridian 2002 [Version 5.1.2600]');
-    T.print('(C) Copyright 1985-2002 Meridian Computers, Inc.');
+    T.print(t('cmd.banner1'));
+    T.print(t('cmd.banner2'));
     T.print('');
     resetPrompt();
     setTimeout(() => input.focus(), 50);

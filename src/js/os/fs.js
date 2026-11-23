@@ -3,10 +3,8 @@
   'use strict';
 
   const KIND_ICON = { txt: 'txt', log: 'log', ini: 'sys', sys: 'sys', dll: 'sys', jpg: 'img', mpg: 'video', eml: 'eml', exe: 'exe', bat: 'bat', wav: 'page' };
-  const KIND_TYPE = {
-    txt: 'Text Document', log: 'Text Document', ini: 'Configuration Settings', sys: 'System file', dll: 'Application Extension',
-    jpg: 'JPEG Image', mpg: 'Movie Clip', eml: 'E-mail Message', exe: 'Application', bat: 'MS-DOS Batch File', wav: 'Wave Sound'
-  };
+  const t = G.t;
+  const KIND_TYPE = { txt: 'type.txt', log: 'type.txt', ini: 'type.ini', sys: 'type.sys', dll: 'type.dll', jpg: 'type.jpg', mpg: 'type.mpg', eml: 'type.eml', exe: 'type.exe', bat: 'type.bat', wav: 'type.wav' };
 
   const FS = {
     index: {},
@@ -46,6 +44,14 @@
 
     label(n) { return typeof n.label === 'function' ? n.label(G.state) : n.name; },
 
+    // Size string with localized units and decimal separator ('1.4 MB' -> '1,4 МБ').
+    size(n) {
+      if (!n || !n.size) return '';
+      let s = String(n.size);
+      if (t('unit.decimal') === ',') s = s.replace(/(\d),(\d{3})/g, '$1 $2').replace(/(\d)\.(\d)/g, '$1,$2');
+      return s.replace(/\bKB\b/, t('unit.kb')).replace(/\bMB\b/, t('unit.mb')).replace(/\bGB\b/, t('unit.gb'));
+    },
+
     icon(n) {
       if (typeof n.icon === 'function') return n.icon(G.state);
       if (n.icon) return n.icon;
@@ -54,12 +60,12 @@
     },
 
     typeName(n) {
-      if (n.type === 'dir') return n.locked && !G.state.unlocked[n.id] ? 'Protected Folder' : 'File Folder';
-      if (n.type === 'drive') return n.driveType || 'Local Disk';
-      if (n.type === 'special') return 'System Folder';
-      if (n.kind === 'mbk') return 'Byteline Backup Archive';
-      if (n.kind === 'app' || n.kind === 'lnk') return 'Shortcut';
-      return KIND_TYPE[n.kind] || 'File';
+      if (n.type === 'dir') return n.locked && !G.state.unlocked[n.id] ? t('type.protected') : t('type.folder');
+      if (n.type === 'drive') return t(n.driveType || 'type.localDisk');
+      if (n.type === 'special') return t('type.sysFolder');
+      if (n.kind === 'mbk') return t('type.mbk');
+      if (n.kind === 'app' || n.kind === 'lnk') return t('type.shortcut');
+      return t(KIND_TYPE[n.kind] || 'type.file');
     },
 
     path(n) {
@@ -107,13 +113,13 @@
         case 'eml':
           return G.apps.launch('mail', { open: n.mail });
         case 'exe':
-          return G.dialogs.msg({ title: n.name, icon: 'error', text: n.name + ' is not a valid application.' });
+          return G.dialogs.msg({ title: n.name, icon: 'error', text: t('fs.notValid', { name: n.name }) });
         case 'mbk':
-          return G.dialogs.msg({ title: n.name, icon: 'info', text: 'Byteline backup archive.\n\nThis file will be restored on the customer\'s computer.' });
+          return G.dialogs.msg({ title: n.name, icon: 'info', text: t('fs.mbkMsg') });
         case 'sys': case 'dll':
-          return G.dialogs.msg({ title: 'Meridian', icon: 'warn', text: 'This file is used by the system. It cannot be opened.' });
+          return G.dialogs.msg({ title: 'Meridian', icon: 'warn', text: t('fs.sysFile') });
         default:
-          return G.dialogs.msg({ title: 'Meridian', icon: 'info', text: 'Meridian cannot open this file:\n' + n.name });
+          return G.dialogs.msg({ title: 'Meridian', icon: 'info', text: t('fs.cantOpen', { name: n.name }) });
       }
     }
   };

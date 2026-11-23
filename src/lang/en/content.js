@@ -1,10 +1,13 @@
-// Text documents found on Daniel Mercer's computer.
-// A value can be a string or a function of the game state.
+// English — documents, e-mail and contacts (Daniel's files).
+// Document keys: 'doc.<id>' (a string, or (state) => string when it depends on progress).
+// Mail keys: 'mail.<id>.subject' / 'mail.<id>.body'. Contacts: 'contact.<who>'.
 (function (G) {
   'use strict';
 
-  G.docs = {
-    readme: `BYTELINE COMPUTER REPAIR — JOB TICKET #4471
+  G.i18n.add('en', {
+  // ================= documents =================
+
+  'doc.readme': `BYTELINE COMPUTER REPAIR — JOB TICKET #4471
 =============================================
 Customer : Lily Mercer
 Device   : Tower PC, Meridian 2002 Home Edition
@@ -33,7 +36,7 @@ The backup stick is E:. Thanks for staying late.
 
 — Pete`,
 
-    schedule: `HVB CHANNEL 12 — OVERNIGHT SCHEDULE — OCTOBER 2003
+  'doc.schedule': `HVB CHANNEL 12 — OVERNIGHT SCHEDULE — OCTOBER 2003
 --------------------------------------------------
 11:00 PM   Channel 12 News at Eleven (Marcy Dell)
 11:35 PM   The Late Movie
@@ -44,7 +47,7 @@ The backup stick is E:. Thanks for staying late.
 --------------------------------------------------
 03:33 AM   [not scheduled]`,
 
-    procedure: `HARROW VALLEY BROADCASTING — CHANNEL 12
+  'doc.procedure': `HARROW VALLEY BROADCASTING — CHANNEL 12
 TRANSMITTER SIGN-OFF PROCEDURE                       Rev. 1987
 ==============================================================
 
@@ -68,7 +71,7 @@ when it started. I am not crazy. It's right there. It has been
 in the procedure since 1987. Why did Halvorsen write that last
 line? What did HE see?`,
 
-    englog: `ENGINEERING LOG — D. MERCER — PERSONAL COPY
+  'doc.englog': `ENGINEERING LOG — D. MERCER — PERSONAL COPY
 =============================================
 
 09/14/03  New network sign-off package installed per R.C.
@@ -114,7 +117,7 @@ line? What did HE see?`,
 10/11/03  Station won't let me run the old procedure anymore, so
           I'll do it from here. Installed TXCTL on this PC — it
           dials the remote control unit at the tower over the
-          modem line. Usage in C:\\Program Files\\TXCTL\\README.TXT
+          modem line. Usage in C:\\Program Files\\Burrell Broadcast\\TXCTL\\README.TXT
 
 10/14/03  It got into the capture files. I can hear the drive
           working when nothing is running. It isn't at the tower
@@ -129,7 +132,7 @@ line? What did HE see?`,
 
 10/14/03  03:31  It's`,
 
-    bearing: `Walt — bearings, from phone call 9/20/03
+  'doc.bearing': `Walt — bearings, from phone call 9/20/03
 ----------------------------------------
 Bearing 1 (Walt's house, Orchard Rd) :  071° magnetic
 Bearing 2 (reservoir parking lot)    :  318° magnetic
@@ -143,7 +146,7 @@ Audio: our sign-off, slowed. Pitched down about a fifth.
 Walt: "Dan, there's no other antenna up there."
 Me:   "I know."`,
 
-    returnNotes: `RETURN SIGNAL — OBSERVATIONS (D.M.)
+  'doc.returnNotes': `RETURN SIGNAL — OBSERVATIONS (D.M.)
 -----------------------------------
 - Starts at 03:33:00 every night we run the new sign-off package.
   1 h 33 m after sign-off. Never off by more than a second.
@@ -156,7 +159,7 @@ Me:   "I know."`,
 - Walt thinks it isn't sending. He thinks it's LOOKING.
 - The capture card LED stays on after I shut the PC down.`,
 
-    txctl: `TXCTL 2.1 — Remote Transmitter Control
+  'doc.txctl': `TXCTL 2.1 — Remote Transmitter Control
 (c) 1998 Burrell Broadcast Systems
 ======================================
 
@@ -180,7 +183,7 @@ sign-off procedure.
 -- configured for HVB-12 Pell Hill RCU, line 555-0112
 -- D.M. 10/11/03`,
 
-    todo: `TO DO
+  'doc.todo': `TO DO
 -----
 - gutter over the garage
 - call Karen re: Thanksgiving (her mom's again?)
@@ -191,7 +194,7 @@ sign-off procedure.
 - DON'T FALL ASLEEP BEFORE 3:33
 - don't look at the window when the TV is on`,
 
-    letter: `Lily,
+  'doc.letter': `Lily,
 
 I know your mom told you I'm "working a lot". That's true. But
 it isn't the whole truth, and you're old enough for a little
@@ -206,7 +209,7 @@ I'll be the one clapping too loud.
 
 [draft — not sent]`,
 
-    budget: `OCTOBER BUDGET
+  'doc.budget': `OCTOBER BUDGET
 --------------------------------
 Rent ......................  640.00
 Car .......................  189.00
@@ -221,7 +224,7 @@ Costume (moon) ............   14.00
 Overtime (Sept): 41 hrs. Ruth says no more OT.
 Fine. I'll do it from home.`,
 
-    dreams: `9/24 — I was at Marcy's desk. The studio lights were so bright
+  'doc.dreams': `9/24 — I was at Marcy's desk. The studio lights were so bright
 I couldn't see the cameras. The floor manager kept counting me
 in. "And we're back in three, two..." We never went anywhere.
 
@@ -233,7 +236,7 @@ somebody's shoulder.
 
 10/8 — No dream. Didn't sleep.`,
 
-    chili: `DAD'S FAMOUS CHILI (Lily-approved version)
+  'doc.chili': `DAD'S FAMOUS CHILI (Lily-approved version)
 ------------------------------------------
 2 lb ground beef
 1 onion, chopped
@@ -245,7 +248,7 @@ NO BEANS  (per Lily, 2002, non-negotiable)
 
 Simmer 2 hours. Watch the Late Movie while it cooks.`,
 
-    program: `HARROW VALLEY ELEMENTARY presents
+  'doc.program': `HARROW VALLEY ELEMENTARY presents
 
         "THE LIGHTHOUSE AND THE MOON"
    a play in one act by Mrs. Adeyemi's 4th grade
@@ -261,13 +264,13 @@ CAST
 The Moon closes the show with "Goodnight, everybody."
 Refreshments in the cafeteria after!`,
 
-    untitled: `it knows when the tv is on.
+  'doc.untitled': `it knows when the tv is on.
 it knows when the monitor is on.
 a monitor is a tv.
 a monitor is a tv.
 a monitor is a tv.`,
 
-    tapeNotes: (s) => `Frame-stepping the 9/22 tape.
+  'doc.tapeNotes': (s) => `Frame-stepping the 9/22 tape.
 
 Frame 0233: the host has no face.
 Frame 0234: the host has MY face. One frame.
@@ -281,7 +284,7 @@ It wears the faces of the people who watch it.` + (s.level >= 2 ? `
 
 (0237 was you, {User}. You looked tired. Hello.)` : ''),
 
-    systemIni: (s) => `[boot]
+  'doc.systemIni': (s) => `[boot]
 shell=explorer.exe
 [drivers]
 wave=tvr878.drv
@@ -292,7 +295,7 @@ AutoRecord=1
 AutoRecordTime=03:33
 Recipient=${s.level >= 3 ? '{USER}' : ''}`,
 
-    setupLog: `Meridian 2002 Home Edition — Setup log
+  'doc.setupLog': `Meridian 2002 Home Edition — Setup log
 ---------------------------------------
 06/02/2002 19:04  Copying files ........... OK
 06/02/2002 19:21  Detecting hardware ...... OK
@@ -301,7 +304,7 @@ Recipient=${s.level >= 3 ? '{USER}' : ''}`,
 06/02/2002 19:30  Registered to: Daniel Mercer
 06/02/2002 19:30  Setup complete.`,
 
-    readmeViewer: `hello {user}.
+  'doc.readmeViewer': `hello {user}.
 
 you're very late. the program started at 3:33.
 we kept the lights on for you.
@@ -312,7 +315,7 @@ daniel says a lot of things. he is a very good guest.
 
 please don't sign off. we've only just met.`,
 
-    guestList: `TONIGHT'S GUESTS
+  'doc.guestList': `TONIGHT'S GUESTS
 ================
 MARCY DELL ..................... arrived 10/01/2003
 HOWARD BRISCOE ................. arrived 10/03/2003
@@ -321,7 +324,7 @@ DANIEL MERCER .................. arrived 10/14/2003  3:33 AM
 LILY MERCER .................... pending
 {USER} .......................... now watching`,
 
-    goodnight: `not Lil. whoever you are.
+  'doc.goodnight': `not Lil. whoever you are.
 
 I can't hold it off for long. It reads this while I write it.
 
@@ -334,6 +337,151 @@ own.
 
 Tell her I was at the play.
 
-— D`
-  };
+— D`,
+
+  // ================= contacts =================
+  'contact.dan': 'Daniel Mercer <dmercer@valleynet.com>',
+  'contact.ruth': 'Ruth Calloway <rcalloway@hvb12.com>',
+  'contact.walt': 'Walt Prokop <wprokop@valleynet.com>',
+  'contact.karen': 'Karen Mercer <kmercer@valleynet.com>',
+  'contact.daemon': 'Mail Delivery Subsystem <MAILER-DAEMON@valleynet.com>',
+  'contact.host': 'Tonight\'s Host <host@ch12>',
+  'contact.viewer': '{User} <viewer@ch12>',
+  'contact.spam1': 'Valley Travel <deals@valleytravel.biz>',
+  'contact.spam2': 'ValleyNet <news@valleynet.com>',
+
+  // ================= mail =================
+  'mail.m_lily1.subject': 'PLAY!!!',
+  'mail.m_lily1.body': `Daddy its Lily. Mom is letting me type.
+
+The school play is OCTOBER 17 and I am the MOON. I get a costume and it lights up. You have to come. You PROMISED.
+
+Mom says you work nights but the play is at 6 so you can come before work.
+
+love lily
+(moon)`,
+  'mail.m_ruth1.subject': 'New sign-off package',
+  'mail.m_ruth1.body': `Dan,
+
+The old sign-off reel is shredding. The network is sending us their new sign-off package, it drops the anthem (finally — nobody is watching at 2 AM). Swap it in when it arrives.
+
+— R`,
+  'mail.m_ruth2.subject': 'Carrier after sign-off??',
+  'mail.m_ruth2.body': `Dan,
+
+The overnight meter strip shows forward power on the visual carrier from 3:33 to 3:58 AM. Did you leave the transmitter up after sign-off? You know what the FCC does to stations for that.
+
+— R`,
+  'mail.m_walt1.subject': 'Re: weird carrier',
+  'mail.m_walt1.body': `Dan,
+
+Heard it on my scanner too. 205.25, strong as anything. Sounded like your sign-off, but slow. Like somebody playing your tape back with their thumb on the reel.
+
+I'll take the loop antenna out tomorrow night and get you a bearing.
+
+73,
+Walt`,
+  'mail.m_walt2.subject': 'Bearing',
+  'mail.m_walt2.body': `Two bearings. One from my place, one from the reservoir. They cross on Pell Hill.
+
+Dan, it's your tower. Your tower is transmitting while it is switched off.
+
+I'd call that impossible, but I've been doing this forty years and I'd call a lot of things impossible tonight.
+
+— W`,
+  'mail.m_ruth3.subject': 'Lock it up',
+  'mail.m_ruth3.body': `Dan,
+
+The FCC inspector is coming Monday. Lock up your Engineering folder and take the recordings home. I don't want him seeing any of that until we know what it is.
+
+Use the usual password — the visual carrier frequency, digits only, no decimal point.
+
+— R`,
+  'mail.m_ruth4.subject': 'Marcy',
+  'mail.m_ruth4.body': `Don't come in tonight.
+
+Marcy didn't go home after the eleven o'clock. Her car is still in the lot with the keys in it. The police want the overnight tapes.
+
+Dan, her name was on that list. Your name was on that list. My name was on that list.
+
+What is this.`,
+  'mail.m_walt3.subject': "Don't keep it tuned in",
+  'mail.m_walt3.body': `I've been thinking about what you said, about the recordings showing your house.
+
+Dan, I don't think it's a transmission. I think it's a RECEPTION. It isn't sending pictures to us. It's taking pictures FROM us. Every set tuned to 12 is a window, and it is looking out of all of them.
+
+Turn off your TV. Unplug that capture card. I mean it.
+
+— W`,
+  'mail.m_lily2.subject': 'the moon',
+  'mail.m_lily2.body': `daddy I practiced my lines 100 times. I am the moon and at the very end I say GOODNIGHT EVERYBODY and then the lights go off.
+
+see you friday!!!!
+
+lily`,
+  'mail.m_spam1.subject': 'You have won a FREE 3-night cruise!!!',
+  'mail.m_spam1.body': 'Congratulations! Call 555-0188 to claim your FREE 3-night cruise. Offer expires soon. (Port fees not included.)',
+  'mail.m_spam2.subject': 'ValleyNet Monthly — October',
+  'mail.m_spam2.body': 'Faster dial-up is here! Upgrade to ValleyNet Turbo 56K for only $4.95 more per month.',
+  'mail.s_ruth.subject': 'Re: Carrier after sign-off??',
+  'mail.s_ruth.body': `Ruth,
+
+The transmitter was OFF. I pulled the breaker myself at 2:04. I'll stay late tonight and look into it.
+
+Dan`,
+  'mail.s_walt.subject': 'closer',
+  'mail.s_walt.body': `Walt,
+
+It's getting closer. The thing at the news desk. Every night it's leaning a little closer to the camera.
+
+I don't think it's leaning toward the camera. I think it's leaning toward whoever is watching.`,
+  'mail.s_ruth2.subject': 'Sign-off',
+  'mail.s_ruth2.body': `Ruth,
+
+I'm going to do the full sign-off from home tonight. TXCTL is set up on my PC through the modem line. The old procedure, anthem first, every step, in order.
+
+Don't argue. Don't send anyone to the tower.
+
+Dan`,
+  'mail.d_lily.subject': '(no subject)',
+  'mail.d_lily.body': `you were right about the moon. it`,
+  'mail.m_bounce.subject': 'Returned mail: see transcript for details',
+  'mail.m_bounce.body': `The original message was received at Tue, 14 Oct 2003 03:29:51 -0500
+----- The following addresses had permanent fatal errors -----
+<kmercer@valleynet.com>
+    (reason: 550 Host unknown)
+
+----- Original message follows -----
+From: Daniel Mercer <dmercer@valleynet.com>
+To: kmercer@valleynet.com
+Subject: for Lily
+
+Lil,
+
+I'm sorry. I don't think I can make it Friday. I need you to know it isn't because of you.
+
+There's something I have to turn off, and I have to do it the right way, the way it's written down, or it won't stay off.
+
+If you ever get this computer: don't watch the tapes. Don't copy them anywhere. Just look at the pictures.
+
+You're the moon, kiddo. Goodnight, everybody.
+
+— Dad`,
+  'mail.m_host.subject': "You're watching",
+  'mail.m_host.body': `Hello, {User}.
+
+Thank you for tuning in.
+
+Daniel was a wonderful guest. He's still here, you know. Would you like to see him?
+
+Open Meridian TV. Channel 12. We're live.
+
+Stay tuned.`,
+  'mail.m_dan_last.subject': '(no subject)',
+  'mail.m_dan_last.body': `the log. by the book.
+
+anthem. bars. visual. aural. sign.
+
+please`
+  });
 })(window.G);

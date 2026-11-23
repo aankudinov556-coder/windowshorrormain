@@ -2,9 +2,10 @@
 (function (G) {
   'use strict';
   const U = G.util;
+  const t = G.t;
 
   async function typeInto(el, text, ms = 38) {
-    for (const ch of text) {
+    for (const ch of U.fill(text)) {
       el.textContent += ch;
       if (ch !== ' ' && ch !== '\n' && Math.random() < 0.5) G.audio.play('type');
       await U.sleep(ch === '\n' ? ms * 9 : ms);
@@ -26,7 +27,7 @@
   }
 
   function powerButton(el) {
-    const b = U.el('button', { class: 'end-btn' }, window.meridian ? '[ Turn off ]' : '[ Power off ]');
+    const b = U.el('button', { class: 'end-btn' }, window.meridian ? t('end.turnOff') : t('end.powerOff'));
     b.addEventListener('click', () => {
       G.fx.setLevel(0);
       document.body.classList.remove('fade-out-ui');
@@ -47,9 +48,9 @@
       const el = overlay('red');
       const lines = U.el('div', { class: 'end-lines' });
       el.appendChild(lines);
-      await typeInto(lines, 'Backup complete.\n7 recordings copied to BYTELINE_BKP (E:).\n\n');
+      await typeInto(lines, t('end.h.1'));
       await U.sleep(1500);
-      await typeInto(lines, 'PETE — 8:14 AM\n"got the stick, thanks. dropping it at Lily\'s tonight.\nweird, there\'s a host.exe on it? whatever, she\'ll figure it out."\n\n', 30);
+      await typeInto(lines, t('end.h.2'), 30);
       await U.sleep(2500);
       lines.textContent = '';
       const c = U.el('canvas', { width: 320, height: 240, style: { width: '480px', height: '360px', filter: 'contrast(1.1) blur(.4px)' } });
@@ -60,23 +61,23 @@
       let run = true;
       const draw = (now) => {
         if (!run) return;
-        const t = (now - t0) / 1000;
-        G.tapeArt.house(ctx, t, { zoom: 1 + Math.min(1.2, t * 0.08), flicker: t > 8 });
-        G.tapeArt.text(ctx, t < 6 ? 'LIVE — THE MERCER HOUSE' : 'SHE LEFT A LIGHT ON.', 160, 214, { size: 12 });
+        const tt = (now - t0) / 1000;
+        G.tapeArt.house(ctx, tt, { zoom: 1 + Math.min(1.2, tt * 0.08), flicker: tt > 8 });
+        G.tapeArt.text(ctx, tt < 6 ? t('end.h.live') : t('end.h.light'), 160, 214, { size: 12 });
         G.tapeArt.snow(ctx, 0.1);
         requestAnimationFrame(draw);
       };
       requestAnimationFrame(draw);
-      G.audio.speak('Thank you for watching. See you at home.', { rate: 0.5, pitch: 0.01 });
+      G.audio.voice('end.h.say', t('end.h.say'), { rate: 0.5, pitch: 0.01 });
       await U.sleep(13000);
       run = false;
       hum.stop();
       c.remove();
       G.audio.play('thump');
-      el.appendChild(U.el('div', { class: 'end-title' }, 'THANK YOU FOR WATCHING.'));
+      el.appendChild(U.el('div', { class: 'end-title' }, t('end.h.title')));
       await U.sleep(2500);
-      el.appendChild(U.el('div', { class: 'end-sub' }, 'ENDING 1 OF 2 — HOMECOMING'));
-      el.appendChild(U.el('div', { class: 'end-sub' }, 'Some recordings should never be backed up.'));
+      el.appendChild(U.el('div', { class: 'end-sub' }, t('end.h.sub')));
+      el.appendChild(U.el('div', { class: 'end-sub' }, t('end.h.moral')));
       finish('homecoming');
       await U.sleep(1500);
       powerButton(el);
@@ -94,29 +95,29 @@
       await U.sleep(2500);
       const lines = U.el('div', { class: 'end-lines' });
       el.appendChild(lines);
-      await typeInto(lines, 'Pete pulled the drive the next morning.\nIt was blank. Every sector read zero.\n\n', 42);
+      await typeInto(lines, t('end.s.1'), 42);
       await U.sleep(1200);
-      await typeInto(lines, 'The backup stick held his pictures and his letters.\nLily Mercer cried at most of them.', 42);
+      await typeInto(lines, t('end.s.2'), 42);
       await U.sleep(2200);
       lines.style.transition = 'opacity 1.2s';
       lines.style.opacity = '0';
       await U.sleep(1300);
       lines.textContent = '';
       lines.style.opacity = '1';
-      await typeInto(lines, 'One she just stared at, for a long time:\na photo nobody remembered taking.', 42);
+      await typeInto(lines, t('end.s.3'), 42);
       await U.sleep(1500);
-      const img = U.el('img', { class: 'end-photo', src: 'assets/img/school_play_2003.jpg', alt: '' });
+      const img = U.el('img', { class: 'end-photo', src: G.i18n.asset('img/school_play_2003.jpg'), alt: '' });
       el.appendChild(img);
       await U.sleep(100);
       img.classList.add('show');
       await U.sleep(3500);
       const cap = U.el('div', { class: 'end-lines' });
       el.appendChild(cap);
-      await typeInto(cap, 'Harrow Valley Elementary — October 17, 2003.\nIn the last row, by the door, someone is clapping too loud.', 40);
+      await typeInto(cap, t('end.s.caption'), 40);
       await U.sleep(3000);
-      el.appendChild(U.el('div', { class: 'end-title' }, 'GOODNIGHT, EVERYBODY.'));
-      el.appendChild(U.el('div', { class: 'end-sub' }, 'ENDING 2 OF 2 — SIGN-OFF        (log signed by ' + name + ')'));
-      el.appendChild(U.el('div', { class: 'end-sub' }, 'AFTER SIGN-OFF — thank you for watching.'));
+      el.appendChild(U.el('div', { class: 'end-title' }, t('end.s.title')));
+      el.appendChild(U.el('div', { class: 'end-sub' }, t('end.s.sub', { name })));
+      el.appendChild(U.el('div', { class: 'end-sub' }, t('end.s.thanks')));
       G.audio.init();
       G.audio.anthem(false);
       finish('signoff');

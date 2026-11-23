@@ -49,7 +49,9 @@ window.G = window.G || {};
 
     pad(n, w = 2) { return String(n).padStart(w, '0'); },
 
+    // Clock and date formats come from the language pack (fmt.clock = '12' | '24', fmt.date = 'mdy' | 'dmy').
     fmtClock(d) {
+      if (G.t && G.t('fmt.clock') === '24') return d.getHours() + ':' + U.pad(d.getMinutes());
       let h = d.getHours();
       const ap = h >= 12 ? 'PM' : 'AM';
       h = h % 12 || 12;
@@ -57,7 +59,33 @@ window.G = window.G || {};
     },
 
     fmtDate(d) {
+      if (G.t && G.t('fmt.date') === 'dmy') return U.pad(d.getDate()) + '.' + U.pad(d.getMonth() + 1) + '.' + d.getFullYear();
       return (d.getMonth() + 1) + '/' + d.getDate() + '/' + d.getFullYear();
+    },
+
+    fmtDateTime(d) { return U.fmtDate(d) + ' ' + U.fmtClock(d); },
+
+    // Parse a timestamp written in content files:
+    //   '2003-09-16 03:58'   a fixed moment
+    //   'TODAY 03:33'        today's date at that time
+    //   'NOW'                right now
+    parseStamp(s) {
+      if (!s) return null;
+      if (s instanceof Date) return s;
+      const now = new Date();
+      if (s === 'NOW') return now;
+      let m = /^TODAY (\d{1,2}):(\d{2})$/.exec(s);
+      if (m) return new Date(now.getFullYear(), now.getMonth(), now.getDate(), +m[1], +m[2]);
+      m = /^(\d{4})-(\d{2})-(\d{2})(?: (\d{1,2}):(\d{2}))?$/.exec(s);
+      if (m) return new Date(+m[1], +m[2] - 1, +m[3], +(m[4] || 0), +(m[5] || 0));
+      return null;
+    },
+
+    // Localized "date time" for a content timestamp; date only when no time was given.
+    stamp(s, dateOnly) {
+      const d = U.parseStamp(typeof s === 'function' ? s() : s);
+      if (!d) return String(s || '');
+      return dateOnly ? U.fmtDate(d) : U.fmtDateTime(d);
     },
 
     fmtVCR(d) {

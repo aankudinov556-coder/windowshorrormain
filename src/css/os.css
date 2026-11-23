@@ -115,7 +115,9 @@ button { font: inherit; color: inherit; }
 .desk-icons { position: absolute; left: 0; top: 0; width: 1024px; height: 738px; }
 .dicon { position: absolute; width: 76px; display: flex; flex-direction: column; align-items: center; gap: 3px; outline: none; }
 .di-img { line-height: 0; }
-.di-label { color: #fff; text-align: center; font-size: 11px; line-height: 13px; padding: 0 2px; text-shadow: 1px 1px 1px #000, 0 0 2px #000; word-break: break-word; max-width: 76px; }
+.di-label { color: #fff; text-align: center; font-size: 11px; line-height: 13px; padding: 0 2px; text-shadow: 1px 1px 1px #000, 0 0 2px #000; word-break: break-word; max-width: 76px;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.dicon.sel .di-label { -webkit-line-clamp: unset; position: relative; z-index: 2; }
 .dicon.sel .di-label { background: #0b61ff; text-shadow: none; outline: 1px dotted #fff; }
 .dicon.sel .di-img { filter: brightness(.75) sepia(.6) hue-rotate(185deg) saturate(2.5); }
 .ico-wrap { position: relative; display: inline-block; line-height: 0; }
@@ -294,3 +296,9 @@ input[type=checkbox] { accent-color: #2a8a2a; }
 .to-circle::after { content: ""; position: absolute; inset: 8px; border: 2px solid #fff; border-radius: 50%; border-top-color: transparent; }
 .to-circle:hover { filter: brightness(1.2); }
 .to-foot { height: 46px; background: #003399; display: flex; align-items: center; justify-content: flex-end; padding: 0 12px; }
+
+/* language picker on the first screen */
+.warn-langs { position: absolute; top: 24px; right: 28px; display: flex; gap: 6px; }
+.warn-lang { background: none; border: 1px solid #444; color: #888; padding: 4px 12px; font: 13px "Courier New", "Liberation Mono", monospace; }
+.warn-lang:hover { color: #ddd; border-color: #888; }
+.warn-lang.sel { color: #fff; border-color: #ddd; }
