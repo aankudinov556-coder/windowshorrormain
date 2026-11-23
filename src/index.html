@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Meridian</title>
+<link rel="stylesheet" href="css/os.css">
+<link rel="stylesheet" href="css/apps.css">
+<link rel="stylesheet" href="css/fx.css">
+</head>
+<body>
+  <!-- The whole "monitor": a fixed 1024x768 surface scaled to fit the window. -->
+  <div id="screen">
+    <div id="stage"></div>
+    <div id="fx-bands"></div>
+    <canvas id="fx-noise" width="256" height="192"></canvas>
+    <div id="fx-scan"></div>
+    <div id="fx-vignette"></div>
+    <div id="fx-flash"></div>
+    <div id="fx-sub"></div>
+    <div id="input-block"></div>
+    <div id="cursor"></div>
+  </div>
+
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <filter id="rgbsplit" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+      <feColorMatrix in="SourceGraphic" type="matrix" values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0" result="r"/>
+      <feOffset in="r" dx="-5" dy="0" result="r2"/>
+      <feColorMatrix in="SourceGraphic" type="matrix" values="0 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 1 0" result="gb"/>
+      <feOffset in="gb" dx="4" dy="1" result="gb2"/>
+      <feBlend in="r2" in2="gb2" mode="screen"/>
+    </filter>
+  </svg>
+
+  <script src="js/core/util.js"></script>
+  <script src="js/core/state.js"></script>
+  <script src="js/core/audio.js"></script>
+  <script src="js/core/fx.js"></script>
+  <script src="js/core/cursor.js"></script>
+  <script src="js/os/icons.js"></script>
+  <script src="js/os/fs.js"></script>
+  <script src="js/os/wm.js"></script>
+  <script src="js/os/dialogs.js"></script>
+  <script src="js/os/wallpaper.js"></script>
+  <script src="js/os/desktop.js"></script>
+  <script src="js/os/taskbar.js"></script>
+  <script src="js/os/boot.js"></script>
+  <script src="js/content/docs.js"></script>
+  <script src="js/content/mail.js"></script>
+  <script src="js/content/fsdata.js"></script>
+  <script src="js/content/tapes.js"></script>
+  <script src="js/apps/explorer.js"></script>
+  <script src="js/apps/notepad.js"></script>
+  <script src="js/apps/imageview.js"></script>
+  <script src="js/apps/mail.js"></script>
+  <script src="js/apps/tv.js"></script>
+  <script src="js/apps/cmd.js"></script>
+  <script src="js/apps/taskmgr.js"></script>
+  <script src="js/apps/backup.js"></script>
+  <script src="js/apps/misc.js"></script>
+  <script src="js/story/director.js"></script>
+  <script src="js/story/endings.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,55 @@
+/* ===== Analog horror effects layer ===== */
+
+#fx-noise, #fx-scan, #fx-vignette, #fx-flash, #fx-sub, #fx-bands {
+  position: absolute; inset: 0; pointer-events: none;
+}
+#fx-noise { width: 1024px; height: 768px; z-index: 1000001; opacity: 0; mix-blend-mode: overlay; image-rendering: pixelated; }
+#fx-scan { z-index: 1000002; opacity: 0;
+  background: repeating-linear-gradient(to bottom, rgba(0,0,0,.28) 0, rgba(0,0,0,.28) 1px, transparent 1px, transparent 3px); }
+#fx-vignette { z-index: 1000003; opacity: 0;
+  background: radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,.75) 100%); }
+#fx-flash { z-index: 1000004; opacity: 0; }
+#fx-bands { z-index: 1000000; }
+#fx-bands .band { position: absolute; width: 1100px; }
+#fx-sub { z-index: 1000005; display: none; align-items: center; justify-content: center; }
+#fx-sub.show { display: flex; }
+.sub-text { font: bold 96px Impact, "Arial Black", "DejaVu Sans", sans-serif; color: #fff; letter-spacing: 6px; text-align: center; text-shadow: 4px 0 #f00, -4px 0 #0ff; white-space: pre-line; }
+.sub-text.small { font-size: 42px; }
+.sub-text.red { color: #e11; text-shadow: 0 0 20px #000; }
+.sub-text.typed { font: 28px "Courier New", monospace; letter-spacing: 1px; text-shadow: none; color: #ddd; }
+
+/* level dressing */
+body.lvl-1 #fx-noise { opacity: .04; }
+body.lvl-2 #fx-noise { opacity: .10; }
+body.lvl-2 #fx-scan { opacity: .25; }
+body.lvl-2 #fx-vignette { opacity: .45; }
+body.lvl-2 #stage { filter: saturate(.85) contrast(1.03); }
+body.lvl-3 #fx-noise { opacity: .16; }
+body.lvl-3 #fx-scan { opacity: .45; }
+body.lvl-3 #fx-vignette { opacity: .8; }
+body.lvl-3 #stage { filter: saturate(.6) contrast(1.1) brightness(.95); }
+body.lvl-4 #fx-noise { opacity: .22; }
+body.lvl-4 #fx-scan { opacity: .6; }
+body.lvl-4 #fx-vignette { opacity: 1; }
+body.lvl-4 #stage { filter: saturate(.55) contrast(1.2) sepia(.25) hue-rotate(-18deg); }
+
+/* CRT curvature hint at late levels */
+body.lvl-ge3 #fx-vignette { background: radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,.6) 85%, rgba(0,0,0,.95) 100%); }
+
+/* slow breathing roll bar */
+body.lvl-ge2 #fx-scan::after { content: ""; position: absolute; left: 0; right: 0; height: 90px; top: -100px;
+  background: linear-gradient(transparent, rgba(255,255,255,.05), transparent); animation: roll 7s linear infinite; }
+@keyframes roll { to { top: 800px; } }
+
+/* glitch */
+#screen.glitching #stage { filter: url(#rgbsplit); transform: translateX(var(--gx)); animation: jitter .12s steps(2) infinite; }
+#screen.glitching-hard #stage { filter: url(#rgbsplit) invert(.15) contrast(1.4); }
+@keyframes jitter { 0% { transform: translate(var(--gx), 0); } 50% { transform: translate(calc(var(--gx) * -1), 1px); } 100% { transform: translate(0, -1px); } }
+
+#screen.shaking #stage { animation: shake .08s linear infinite; }
+@keyframes shake { 0% { transform: translate(2px, 1px); } 25% { transform: translate(-3px, -1px); } 50% { transform: translate(1px, 2px); } 75% { transform: translate(-1px, -2px); } 100% { transform: translate(2px, 0); } }
+
+#screen.tinted::after { content: ""; position: absolute; inset: 0; z-index: 999999; pointer-events: none; background: var(--tint, #f00); mix-blend-mode: multiply; opacity: .55; }
+
+/* fading entire UI out (sign-off) */
+.fade-out-ui #desktop .desk-icons, .fade-out-ui #taskbar, .fade-out-ui .wallpaper { transition: opacity 2.5s; opacity: 0; }
