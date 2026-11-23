@@ -10,7 +10,13 @@
 
 ---
 
-## Как запустить
+## Скачать
+
+Готовые сборки для Windows лежат в разделе **[Releases](https://github.com/aankudinov556-coder/windowshorrormain/releases)**: установщик, портативный `.exe` и zip.
+
+Новый релиз собирается workflow **Release** (`.github/workflows/release.yml`) на Windows-машине GitHub Actions. Запустить его можно вкладкой **Actions → Release → Run workflow** (указать тег, например `v0.2.0`) или пушем тега `v*`.
+
+## Как запустить из исходников
 
 ### Быстро, в браузере
 Открыть `src/index.html` в Chrome/Edge (двойным кликом) или поднять локальный сервер:

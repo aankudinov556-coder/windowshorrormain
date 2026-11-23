@@ -10,8 +10,8 @@
     "dev": "electron . --dev",
     "serve": "python3 -m http.server 8080 --directory src",
     "photos": "python3 tools/gen_photos.py",
-    "dist": "electron-builder --win",
-    "dist:portable": "electron-builder --win portable"
+    "dist": "electron-builder --win --publish never",
+    "dist:portable": "electron-builder --win portable --publish never"
   },
   "devDependencies": {
     "electron": "45.2.3",
@@ -31,18 +31,39 @@
     },
     "win": {
       "target": [
-        "nsis",
-        "portable"
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "x64"
+          ]
+        }
       ],
       "icon": "build/icon.png"
     },
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
-      "shortcutName": "Meridian"
+      "shortcutName": "Meridian",
+      "artifactName": "AfterSignOff-Setup-${version}.${ext}",
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
     },
     "portable": {
-      "artifactName": "Meridian-portable.exe"
-    }
-  }
+      "artifactName": "AfterSignOff-${version}-portable.${ext}"
+    },
+    "artifactName": "AfterSignOff-${version}-win-${arch}.${ext}"
+  },
+  "author": "After Sign-Off"
 }

@@ -1,0 +1,52 @@
+name: Release
+
+# Builds the Windows game on a real Windows runner and publishes a GitHub Release.
+# Run it from the Actions tab ("Run workflow") or push a tag like v0.2.0.
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag (e.g. v0.1.0)'
+        required: true
+        default: 'v0.1.0'
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    env:
+      TAG: ${{ github.event.inputs.tag || github.ref_name }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build installer, portable exe and zip
+        run: npx electron-builder --win --x64 --publish never
+
+      - name: List build output
+        shell: bash
+        run: ls -la dist
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.TAG }}
+          name: After Sign-Off ${{ env.TAG }}
+          target_commitish: ${{ github.sha }}
+          body_path: docs/RELEASE_NOTES.md
+          files: |
+            dist/AfterSignOff-Setup-*.exe
+            dist/AfterSignOff-*-portable.exe
+            dist/AfterSignOff-*-win-x64.zip
