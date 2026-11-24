@@ -74,6 +74,9 @@
       check.innerHTML = '';
       check.appendChild(U.el('b', null, t('bk.check')));
       [['pics', 'bk.cPics'], ['docs', 'bk.cDocs'], ['mail', 'bk.cMail']].forEach(([k, l]) => check.appendChild(U.el('span', { class: b[k] ? 'done' : '' }, (b[k] ? '☑ ' : '☐ ') + t(l))));
+      // Lily's request on Pete's ticket: anything Daniel wrote to her.
+      const letter = !!G.state.mailRead.m_bounce;
+      check.appendChild(U.el('span', { class: letter ? 'done' : 'optional' }, (letter ? '☑ ' : '☐ ') + t('bk.cLetter')));
       if (b.pics && b.docs && b.mail) check.appendChild(U.el('span', { class: 'bk-alldone' }, L >= 4 ? t('bk.allDone4') : t('bk.allDone')));
     }
 
@@ -181,7 +184,8 @@
 
     w.refresh = render;
     const unsub = G.on('fs:change', () => { if (!w.closed && !running) render(); });
-    w.onClose(unsub);
+    const unsubMail = G.on('mail:read', () => { if (!w.closed && !running) render(); });
+    w.onClose(() => { unsub(); unsubMail(); });
     render();
     return w;
   });

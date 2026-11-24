@@ -1,0 +1,43 @@
+{
+  "_help": [
+    "Source images for the in-game photos and VHS tape backgrounds.",
+    "Put an image (jpg/png/webp, any size) at assets_src/photos/<slot>.* or assets_src/tapes/<slot>.* and run: npm run photos",
+    "No file for a slot = the procedural (drawn) version is used.",
+    "crop:  [centerX, centerY, zoom]  — 4:3 crop around a point given as fractions of the source image; zoom > 1 crops tighter.",
+    "grade: bright, sat, contrast (1 = unchanged), warm (-0.2..0.2), night (true = blue night conversion), keepLights (night: keep bright windows/lamps, default true).",
+    "   (any overlay accepts \"alpha\" 0..1 and \"blur\" in pixels)",
+    "flash: [x, y, radius] — on-camera flash falloff, fractions of the output frame.",
+    "overlays: drawn on top, coordinates are fractions of the OUTPUT frame (after cropping).",
+    "   figure {x, feet, h, color}      tall faceless figure",
+    "   ghost  {x, feet, h, alpha}      translucent person",
+    "   window_man {x, y, w, h}         head-and-shoulders silhouette inside a lit window",
+    "   moon_child {x, feet, h}         small child in a crescent-moon costume",
+    "   spot {x, y, r, alpha}           stage spotlight",
+    "Set \"overlays\": [] if your image already shows what the story needs.",
+    "Tape points (tapes.*.points) are fractions of the 320x240 tape frame and are written to src/assets/tapes/points.js.",
+    "source: \"other_slot\" reuses another slot's image (ch12_staff_2003_b = same staff photo + the tall figure).",
+    "style: \"vhs\" = paused-tape look (scanlines, heavy noise) with an \"osd\" timestamp instead of a camera date stamp."
+  ],
+  "photos": {
+    "pell_hill_tower": {"crop": [0.5, 0.55, 1.0], "grade": {"bright": 0.95, "sat": 0.85, "warm": 0.08}, "stamp": "'03 8 11"},
+    "IMG_0047": {"crop": [0.5, 0.6, 1.0], "grade": {"night": true, "bright": 0.9}, "flash": [0.5, 1.0, 0.8], "overlays": [{"type": "figure", "x": 0.4, "feet": 0.86, "h": 0.4, "color": [14, 14, 18], "alpha": 0.88, "blur": 2.2}], "stamp": "'03 10 14"},
+    "station_control_room": {"crop": [0.5, 0.5, 1.0], "grade": {"bright": 0.8, "sat": 0.9, "warm": -0.04}, "stamp": "'03 8 30"},
+    "lily_birthday_8": {"crop": [0.5, 0.5, 1.0], "grade": {"warm": 0.06}, "stamp": "'02 3 9"},
+    "christmas_2002": {"crop": [0.5, 0.55, 1.0], "grade": {"bright": 0.62, "warm": 0.07, "contrast": 1.1}, "flash": [0.5, 0.55, 0.9], "stamp": "'02 12 25"},
+    "lake_fishing": {"crop": [0.42, 0.55, 1.0], "grade": {"warm": 0.08, "sat": 0.9}, "stamp": "'03 7 4"},
+    "DSC_0013": {"crop": [0.62, 0.45, 1.15], "grade": {"bright": 0.55, "sat": 0.75, "warm": -0.05, "contrast": 1.15}, "overlays": [{"type": "window_man", "x": 0.815, "y": 0.36, "w": 0.075, "h": 0.2}], "stamp": "'03 10 9"},
+    "school_play_2003": {"crop": [0.55, 0.52, 1.0], "grade": {"bright": 0.78, "warm": 0.05, "contrast": 1.1}, "overlays": [{"type": "spot", "x": 0.6, "y": 0.6, "r": 0.16, "alpha": 0.28}, {"type": "moon_child", "x": 0.6, "feet": 0.68, "h": 0.15}, {"type": "ghost", "x": 0.2, "feet": 0.86, "h": 0.34, "alpha": 0.26}], "stamp": "'03 10 17"},
+    "family_picnic_2001": {"crop": [0.6, 0.6, 1.0], "grade": {"warm": 0.05, "sat": 1.05}, "stamp": "'01 6 17"},
+    "ch12_staff_2003": {"crop": [0.5, 0.5, 1.0], "grade": {}, "stamp": "'03 9 5"},
+    "ch12_staff_2003_b": {"source": "ch12_staff_2003", "crop": [0.5, 0.5, 1.0], "grade": {}, "overlays": [{"type": "figure", "x": 0.42, "feet": 1.08, "h": 1.15, "color": [6, 6, 8], "alpha": 0.95}], "stamp": "'03 9 5"},
+    "lily_moon_costume": {"crop": [0.5, 0.5, 1.0], "grade": {}, "stamp": "'03 10 12"},
+    "frame_0233": {"style": "vhs", "osd": "SEP 22 2003  03:41:07 AM"},
+    "frame_0234": {"style": "vhs", "osd": "SEP 22 2003  03:41:08 AM"},
+    "frame_0237": {"style": "vhs", "osd": "SEP 22 2003  03:41:11 AM"}
+  },
+  "tapes": {
+    "house": {"crop": [0.8, 0.43, 1.7], "grade": {"night": true, "bright": 0.85}, "points": {"window": [0.725, 0.28, 0.13, 0.37]}},
+    "room": {"crop": [0.48, 0.42, 1.35], "grade": {"night": true, "bright": 0.5, "keepLights": false}, "points": {"screen": [0.4, 0.27, 0.22, 0.24]}},
+    "tower": {"crop": [0.5, 0.55, 1.0], "grade": {"night": true, "bright": 0.75}, "points": {"beacon": [0.495, 0.21]}}
+  }
+}

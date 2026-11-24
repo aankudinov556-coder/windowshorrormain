@@ -86,7 +86,8 @@ G.i18n.add('en', {
     'is your door locked?\ndaniel\'s wasn\'t.',
     'we like your room.\nit is very blue in here.\nthe light from the screen is on your face.',
     'the backup is a lovely idea.\nbring everyone.',
-    'daniel says you type like lily.\nslow. careful.\nwe will be very careful with you.'
+    'daniel says you type like lily.\nslow. careful.\nwe will be very careful with you.',
+    'we are what is left on the air\nafter everyone stops watching.\n\nyou didn\'t stop.'
   ],
   'st.danNotes': [
     'don\'t copy the tapes. it isn\'t me in them.\nit only wears me.',
@@ -128,6 +129,7 @@ G.i18n.add('en', {
   'tx.down': 'DOWN',
   'tx.on': 'ON',
   'tx.log': 'LOG ................ UNSIGNED',
+  'tx.lastAttempt': 'LAST SIGN-OFF ...... 10/14/2003 03:31 — STOPPED AT STEP 5',
   'tx.tired': 'it has been on since 2003. it is very tired. let it rest with us.',
   'tx.alreadyOn': 'RCU: carrier is already ON.',
   'tx.syntax': 'RCU: ?SYNTAX — type TXCTL HELP',
@@ -157,6 +159,7 @@ G.i18n.add('en', {
   // ================= endings =================
   'end.turnOff': '[ Turn off ]',
   'end.powerOff': '[ Power off ]',
+  'end.s.dan': 'it\'s quiet.\n\nthank you.\ntell her i\'m sorry i was late.\n\n— D',
   'end.h.1': 'Backup complete.\n7 recordings copied to BYTELINE_BKP (E:).\n\n',
   'end.h.2': 'PETE — 8:14 AM\n"got the stick, thanks. dropping it at Lily\'s tonight.\nweird, there\'s a host.exe on it? whatever, she\'ll figure it out."\n\n',
   'end.h.live': 'LIVE — THE MERCER HOUSE',
@@ -165,10 +168,12 @@ G.i18n.add('en', {
   'end.h.title': 'THANK YOU FOR WATCHING.',
   'end.h.sub': 'ENDING 1 OF 2 — HOMECOMING',
   'end.h.moral': 'Some recordings should never be backed up.',
+  'end.h.list': 'TONIGHT\'S GUESTS\n================\nMARCY DELL ............ arrived 10/01/2003\nRUTH CALLOWAY ......... arrived 10/12/2003\nDANIEL MERCER ......... arrived 10/14/2003\nLILY MERCER ........... arrived {DATE}\n{USER} ......... thank you for watching',
   'end.s.1': 'Pete pulled the drive the next morning.\nIt was blank. Every sector read zero.\n\n',
   'end.s.2': 'The backup stick held his pictures and his letters.\nLily Mercer cried at most of them.',
+  'end.s.letter': '\n\nThe backup also held the letter he wrote her the night he disappeared.\nTwenty-three years late, it was delivered.',
   'end.s.3': 'One she just stared at, for a long time:\na photo nobody remembered taking.',
-  'end.s.caption': 'Harrow Valley Elementary — October 17, 2003.\nIn the last row, by the door, someone is clapping too loud.',
+  'end.s.caption': 'Harrow Valley Elementary — October 17, 2003.\nThree days after Daniel Mercer disappeared.\nIn the last row, by the door, someone is clapping too loud.',
   'end.s.title': 'GOODNIGHT, EVERYBODY.',
   'end.s.sub': 'ENDING 2 OF 2 — SIGN-OFF        (log signed by {name})',
   'end.s.thanks': 'AFTER SIGN-OFF — thank you for watching.'

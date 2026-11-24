@@ -1,23 +1,30 @@
 #!/usr/bin/env python3
-"""Generate the in-game "photos" for AFTER SIGN-OFF.
+"""Generate the in-game "photos" and VHS tape backgrounds for AFTER SIGN-OFF.
 
-Every image is drawn procedurally (no external assets, no licensing issues)
-and then degraded to look like a cheap early-2000s digital camera shot:
-blur, sensor noise, vignette, an orange date stamp and heavy JPEG artifacts.
+For every slot listed in assets_src/slots.json:
+  - if a source image exists (assets_src/photos/<slot>.* or assets_src/tapes/<slot>.*),
+    it is cropped, colour-graded, gets the story overlays (figures, silhouettes)
+    and is degraded like a cheap early-2000s camera shot;
+  - otherwise the slot is drawn procedurally (the original look).
+Source images can be CC0/public-domain photos (see assets_src/credits.json)
+or your own AI-generated pictures.
 
-Usage:  python3 tools/gen_photos.py
-Output: src/assets/img/*.jpg and build/icon.png
+Usage:  python3 tools/gen_photos.py        (npm run photos)
+Output: src/assets/img/*.jpg, src/assets/tapes/*.jpg + points.js, build/icon.png
 """
 import io
+import json
 import math
 import os
 import random
 
 import numpy as np
-from PIL import Image, ImageDraw, ImageFilter
+from PIL import Image, ImageDraw, ImageEnhance, ImageFilter
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(ROOT, 'src', 'assets', 'img')
+TAPES_OUT = os.path.join(ROOT, 'src', 'assets', 'tapes')
+SRC = os.path.join(ROOT, 'assets_src')
 W, H = 640, 480
 
 
@@ -451,28 +458,187 @@ def icon():
     print('  wrote build/icon.png')
 
 
+# ---------------------------------------------------------------- source images
+def find_source(kind, slot):
+    for ext in ('.png', '.jpg', '.jpeg', '.webp'):
+        p = os.path.join(SRC, kind, slot + ext)
+        if os.path.exists(p):
+            return p
+    return None
+
+
+def cover(im, cx, cy, zoom, ow, oh):
+    """4:3 (ow:oh) crop around (cx, cy) given as fractions of the source."""
+    sw, sh = im.size
+    aspect = ow / oh
+    if sw / sh > aspect:
+        ch = sh
+        cw = ch * aspect
+    else:
+        cw = sw
+        ch = cw / aspect
+    cw /= max(zoom, 1.0)
+    ch /= max(zoom, 1.0)
+    x0 = min(max(cx * sw - cw / 2, 0), sw - cw)
+    y0 = min(max(cy * sh - ch / 2, 0), sh - ch)
+    return im.crop((int(x0), int(y0), int(x0 + cw), int(y0 + ch))).resize((ow, oh), Image.LANCZOS)
+
+
+def grade(im, g):
+    if g.get('night'):
+        a = np.asarray(im).astype(np.float32) / 255.0
+        lum = a.mean(axis=2, keepdims=True)
+        n = a * 0.3 + lum * 0.7
+        n = np.power(n, 1.7) * 0.55 * g.get('bright', 1.0)
+        n[..., 0] *= 0.75
+        n[..., 2] *= 1.3
+        if g.get('keepLights', True):
+            hl = np.clip((lum - 0.72) / 0.22, 0, 1)  # keep lit windows / lamps warm and bright
+            n = n * (1 - hl) + a * hl
+        im = Image.fromarray(np.clip(n * 255, 0, 255).astype(np.uint8))
+    else:
+        if g.get('bright', 1) != 1:
+            im = ImageEnhance.Brightness(im).enhance(g['bright'])
+    if g.get('sat', 1) != 1:
+        im = ImageEnhance.Color(im).enhance(g['sat'])
+    if g.get('contrast', 1) != 1:
+        im = ImageEnhance.Contrast(im).enhance(g['contrast'])
+    if g.get('warm'):
+        a = np.asarray(im).astype(np.float32)
+        a[..., 0] *= 1 + g['warm']
+        a[..., 2] *= 1 - g['warm']
+        im = Image.fromarray(np.clip(a, 0, 255).astype(np.uint8))
+    return im
+
+
+def overlay(im, ops):
+    """Story additions drawn on a separate layer, softened, then composited."""
+    w, h = im.size
+    for op in ops or []:
+        layer = Image.new('RGB', (w, h), (0, 0, 0))
+        mask = Image.new('L', (w, h), 0)
+        dl, dm = ImageDraw.Draw(layer), ImageDraw.Draw(mask)
+        t = op['type']
+        alpha = int(255 * op.get('alpha', 1.0))
+        blur = 1.2
+        if t == 'figure':
+            col = tuple(op.get('color', [8, 8, 10]))
+            tall_figure(dl, op['x'] * w, op['feet'] * h, op['h'] * h, col)
+            tall_figure(dm, op['x'] * w, op['feet'] * h, op['h'] * h, alpha)
+            blur = 1.6
+        elif t == 'ghost':
+            x, feet, hh = op['x'] * w, op['feet'] * h, op['h'] * h
+            for d, c in ((dl, (120, 124, 130)), (dm, alpha)):
+                d.ellipse([x - hh * 0.08, feet - hh, x + hh * 0.08, feet - hh * 0.8], fill=c)
+                d.rounded_rectangle([x - hh * 0.15, feet - hh * 0.8, x + hh * 0.15, feet - hh * 0.38], radius=int(hh * 0.06), fill=c)
+                d.rectangle([x - hh * 0.12, feet - hh * 0.4, x + hh * 0.12, feet], fill=c)
+                d.rectangle([x - hh * 0.2, feet - hh * 0.62, x + hh * 0.2, feet - hh * 0.55], fill=c)  # hands together, clapping
+            blur = 2.4
+        elif t == 'window_man':
+            x, y, ww, wh = op['x'] * w, op['y'] * h, op['w'] * w, op['h'] * h
+            for d, c in ((dl, (22, 16, 10)), (dm, 235)):
+                d.ellipse([x + ww * 0.25, y + wh * 0.35, x + ww * 0.65, y + wh * 0.66], fill=c)
+                d.ellipse([x + ww * 0.02, y + wh * 0.62, x + ww * 0.9, y + wh * 1.25], fill=c)
+            dl.rectangle([x + ww * 0.7, y + wh * 0.6, x + ww * 0.98, y + wh * 0.82], fill=(120, 160, 255))
+            dm.rectangle([x + ww * 0.7, y + wh * 0.6, x + ww * 0.98, y + wh * 0.82], fill=150)
+            blur = 1.4
+        elif t == 'moon_child':
+            x, feet, hh = op['x'] * w, op['feet'] * h, op['h'] * h
+            person(dl, x, feet, hh, (60, 60, 110), pants=(40, 40, 80), hair=(150, 100, 50))
+            person(dm, x, feet, hh, 255, pants=255, skin=255, hair=255)
+            r = hh * 0.42
+            moon = Image.new('L', (w, h), 0)
+            mdraw = ImageDraw.Draw(moon)
+            mdraw.ellipse([x - r * 1.15, feet - hh * 0.95, x + r * 0.85, feet - hh * 0.95 + r * 2], fill=255)
+            mdraw.ellipse([x - r * 0.75, feet - hh * 1.05, x + r * 1.2, feet - hh * 1.05 + r * 2], fill=0)
+            layer.paste(Image.new('RGB', (w, h), (250, 215, 70)), (0, 0), moon)
+            mask = Image.composite(Image.new('L', (w, h), 255), mask, moon)
+            blur = 1.0
+        elif t == 'spot':
+            r = op['r'] * w
+            cx, cy = op['x'] * w, op['y'] * h
+            dl.ellipse([cx - r, cy - r, cx + r, cy + r], fill=(255, 245, 215))
+            dm.ellipse([cx - r, cy - r, cx + r, cy + r], fill=alpha)
+            blur = r * 0.45
+        mask = mask.filter(ImageFilter.GaussianBlur(op.get('blur', blur)))
+        im = Image.composite(layer, im, mask)
+    return im
+
+
+def photo_from_source(slot, cfg):
+    path = find_source('photos', slot) or (find_source('photos', cfg['source']) if cfg.get('source') else None)
+    if not path:
+        return None
+    im = Image.open(path).convert('RGB')
+    cx, cy, zoom = cfg.get('crop', [0.5, 0.5, 1.0])
+    im = cover(im, cx, cy, zoom, W, H)
+    im = grade(im, cfg.get('grade', {}))
+    im = overlay(im, cfg.get('overlays', []))
+    if cfg.get('style') == 'vhs':
+        d = ImageDraw.Draw(im)
+        d.text((24, 22), 'PLAY >', fill=(255, 255, 255))
+        d.text((W - 210, H - 36), cfg.get('osd', ''), fill=(255, 255, 255))
+        return degrade(im, blur=1.0, noise=26, vignette=0.5, scan=True, quality=24)
+    fl = cfg.get('flash')
+    flash = (fl[0] * W, fl[1] * H, fl[2] * W, 1.15) if fl else None
+    return degrade(im, blur=0.9, noise=12, vignette=0.5, flash=flash, stamp=cfg.get('stamp'), quality=38)
+
+
+def tapes_from_sources(cfg):
+    """VHS backgrounds (320x240) + overlay points for js/content/tapes.js."""
+    os.makedirs(TAPES_OUT, exist_ok=True)
+    have, points = {}, {}
+    for slot, c in cfg.items():
+        path = find_source('tapes', slot)
+        dest = os.path.join(TAPES_OUT, slot + '.jpg')
+        if not path:
+            have[slot] = False
+            if os.path.exists(dest):
+                os.remove(dest)
+            continue
+        im = Image.open(path).convert('RGB')
+        cx, cy, zoom = c.get('crop', [0.5, 0.5, 1.0])
+        im = grade(cover(im, cx, cy, zoom, 320, 240), c.get('grade', {}))
+        im = im.filter(ImageFilter.GaussianBlur(0.6))
+        im.save(dest, 'JPEG', quality=72)
+        have[slot] = True
+        points[slot] = c.get('points', {})
+        print('  wrote tapes/' + slot + '.jpg')
+    js = ('// Generated by tools/gen_photos.py from assets_src/slots.json. Do not edit by hand.\n'
+          'window.G = window.G || {};\n'
+          'G.TAPE_BG = ' + json.dumps(have) + ';\n'
+          'G.TAPE_POINTS = ' + json.dumps(points) + ';\n')
+    with open(os.path.join(TAPES_OUT, 'points.js'), 'w') as f:
+        f.write(js)
+    print('  wrote tapes/points.js')
+
+
 def main():
     os.makedirs(OUT, exist_ok=True)
     os.makedirs(os.path.join(ROOT, 'build'), exist_ok=True)
+    with open(os.path.join(SRC, 'slots.json')) as f:
+        slots = json.load(f)
     random.seed(1987)
     np.random.seed(1987)
-    save(family_picnic(), 'family_picnic_2001.jpg')
-    save(birthday(), 'lily_birthday_8.jpg')
-    save(christmas(), 'christmas_2002.jpg')
-    save(lake(), 'lake_fishing.jpg')
-    save(tower_photo(), 'pell_hill_tower.jpg')
-    save(control_room(), 'station_control_room.jpg')
-    random.seed(5)
-    save(staff(False), 'ch12_staff_2003.jpg')
-    random.seed(5)
-    save(staff(True), 'ch12_staff_2003_b.jpg')
-    save(moon_costume(), 'lily_moon_costume.jpg')
-    save(img_0047(), 'IMG_0047.jpg')
-    save(dsc_0013(), 'DSC_0013.jpg')
-    save(vhs_frame('blank'), 'frame_0233.jpg', 30)
-    save(vhs_frame('dan'), 'frame_0234.jpg', 30)
-    save(vhs_frame('you'), 'frame_0237.jpg', 30)
-    save(school_play(), 'school_play_2003.jpg')
+    def seeded(seed, fn, *args):
+        def run():
+            random.seed(seed)
+            return fn(*args)
+        return run
+    procedural = {
+        'family_picnic_2001': family_picnic, 'lily_birthday_8': birthday, 'christmas_2002': christmas,
+        'lake_fishing': lake, 'pell_hill_tower': tower_photo, 'station_control_room': control_room,
+        'IMG_0047': img_0047, 'DSC_0013': dsc_0013, 'school_play_2003': school_play,
+        'ch12_staff_2003': seeded(5, staff, False), 'ch12_staff_2003_b': seeded(5, staff, True),
+        'lily_moon_costume': moon_costume,
+        'frame_0233': seeded(0, vhs_frame, 'blank'), 'frame_0234': seeded(0, vhs_frame, 'dan'), 'frame_0237': seeded(0, vhs_frame, 'you')
+    }
+    for slot, fn in procedural.items():
+        cfg = slots['photos'].get(slot, {})
+        img = photo_from_source(slot, cfg)
+        print('  [%s] %s' % ('photo' if img else 'drawn', slot))
+        save(img or fn(), slot + '.jpg', 30 if slot.startswith('frame_') else 40)
+    tapes_from_sources(slots['tapes'])
     icon()
 
 

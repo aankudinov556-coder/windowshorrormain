@@ -12,7 +12,8 @@
     "photos": "python3 tools/gen_photos.py",
     "dist": "electron-builder --win --publish never",
     "dist:portable": "electron-builder --win portable --publish never",
-    "i18n:check": "node tools/check_i18n.js"
+    "i18n:check": "node tools/check_i18n.js",
+    "voice:export": "node tools/export_voice.js"
   },
   "devDependencies": {
     "electron": "45.2.3",

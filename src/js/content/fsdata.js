@@ -58,6 +58,7 @@
                     dir('engineering', t('fs.engineering'), [
                       txt('f_englog', t('file.englog'), 'englog', '2003-10-14 03:31', '4 KB'),
                       txt('f_bearing', t('file.bearing'), 'bearing', '2003-09-20 06:10'),
+                      txt('f_halvorsen', t('file.halvorsen'), 'halvorsen', '2003-09-27 05:40', '2 KB'),
                       txt('f_returnnotes', t('file.returnnotes'), 'returnNotes', '2003-10-02 05:17'),
                       dir('frames', 'frame_captures', [
                         jpg('p_f233', 'frame_0233.jpg', 'frame_0233.jpg', '2003-09-23 04:40', '22 KB'),

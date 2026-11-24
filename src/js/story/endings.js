@@ -73,6 +73,10 @@
       run = false;
       hum.stop();
       c.remove();
+      // The guest list, updated: Lily was the last name it was waiting for.
+      lines.classList.add('end-list');
+      await typeInto(lines, t('end.h.list'), 34);
+      await U.sleep(2500);
       G.audio.play('thump');
       el.appendChild(U.el('div', { class: 'end-title' }, t('end.h.title')));
       await U.sleep(2500);
@@ -95,9 +99,22 @@
       await U.sleep(2500);
       const lines = U.el('div', { class: 'end-lines' });
       el.appendChild(lines);
+      // Daniel, one last time.
+      await typeInto(lines, t('end.s.dan'), 80);
+      await U.sleep(2800);
+      lines.style.transition = 'opacity 1.2s';
+      lines.style.opacity = '0';
+      await U.sleep(1300);
+      lines.textContent = '';
+      lines.style.opacity = '1';
       await typeInto(lines, t('end.s.1'), 42);
       await U.sleep(1200);
       await typeInto(lines, t('end.s.2'), 42);
+      // Pete's ticket asked for anything Daniel wrote to Lily: the bounced letter.
+      if (G.state.mailRead.m_bounce || G.state.mailArrived.m_bounce) {
+        await U.sleep(900);
+        await typeInto(lines, t('end.s.letter'), 42);
+      }
       await U.sleep(2200);
       lines.style.transition = 'opacity 1.2s';
       lines.style.opacity = '0';

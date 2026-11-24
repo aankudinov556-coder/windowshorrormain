@@ -203,8 +203,9 @@
       await T.slow(t('cmd.dialing'), '', 22);
       G.audio.play('hdd');
       await U.sleep(1200);
+      // The "station" only goes on the air once the Host is fully awake (final act).
       if (L < 4) {
-        T.print(t('cmd.nodial'));
+        lines(L === 3 ? 'cmd.warming' : 'cmd.carrierOff').forEach((l) => T.print(l));
         if (L === 3) { await U.sleep(900); for (const l of lines('cmd.nodial3')) await T.host(l); }
         T.lock(false);
         return;

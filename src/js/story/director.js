@@ -333,6 +333,7 @@
         T.print(t('tx.visual', { v: done.includes('visual off') ? t('tx.down') : t('tx.on') }));
         T.print(t('tx.aural', { v: done.includes('aural off') ? t('tx.down') : t('tx.on') }));
         T.print(t('tx.log'));
+        T.print(t('tx.lastAttempt'), 'warn');
         if (!done.length) await T.host(t('tx.tired'));
         return;
       }

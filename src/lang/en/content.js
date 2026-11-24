@@ -16,21 +16,26 @@ In       : 11/21/2026
 
 Hey,
 
-This is the one from the storage unit. It belonged to the
-customer's dad. He went missing back in 2003 — she didn't want
-to talk about it and I didn't push. Nobody has turned this
-thing on in twenty-three years.
+This is the one from the storage unit. The customer's mom
+passed in the spring and she's clearing the unit out. The PC
+belonged to her dad. He went missing in October 2003 — the
+police never found anything. Nobody has turned this thing on
+in twenty-three years.
 
-The drive is dying, so DON'T poke around more than you have to.
-Just:
+The drive is dying, so be quick. Just:
 
    1. Open the Backup Wizard (on the desktop).
    2. Back up My Pictures, My Documents and his E-mail.
    3. Shut it down. I'll pull the drive in the morning.
 
-She was very specific about one thing: do NOT copy the TV
-recordings (drive D:). Her words: "I don't want those. Please
-don't copy those." So don't.
+Two things she asked for:
+
+ - If you find anything he wrote to HER — a letter, an e-mail,
+   anything from that last week — make sure it's in the backup.
+   She was nine. She never heard from him again.
+
+ - Do NOT copy the TV recordings (drive D:). Her words:
+   "I don't want those. Please don't copy those." So don't.
 
 The backup stick is E:. Thanks for staying late.
 
@@ -68,8 +73,9 @@ A transmitter that is not signed off is still on the air.
 --------------------------------------------------------------
 DM 9/25/03: Ruth's new package skips step 1. That is exactly
 when it started. I am not crazy. It's right there. It has been
-in the procedure since 1987. Why did Halvorsen write that last
-line? What did HE see?`,
+in the procedure since 1987.
+DM 9/27/03: Found out WHY. Halvorsen's memo from '87 was in the
+old binders. Copied it to Engineering. It happened before.`,
 
   'doc.englog': `ENGINEERING LOG — D. MERCER — PERSONAL COPY
 =============================================
@@ -107,30 +113,46 @@ line? What did HE see?`,
           It came back at 03:33. It was angry. I don't know how
           a picture can be angry. It was.
 
+09/27/03  Halvorsen saw this in 1987. His memo is in Engineering.
+          An unfinished broadcast day leaves the channel open,
+          and something on the other side answers. The anthem
+          tells it the day is over. Ruth threw that away.
+
 09/30/03  Emergency alert format. A list of names. Marcy's.
-          Ruth's. Mine.
+          Ruth's. Mine. And at the bottom: LILY MERCER — pending.
+          She stayed over Saturday. She woke up and watched it.
+          Everyone who watches it ends up on the list.
 
 10/01/03  Marcy is gone.
 
 10/09/03  It showed my house tonight. From the street. My window.
 
 10/11/03  Station won't let me run the old procedure anymore, so
-          I'll do it from here. Installed TXCTL on this PC — it
-          dials the remote control unit at the tower over the
-          modem line. Usage in C:\\Program Files\\Burrell Broadcast\\TXCTL\\README.TXT
+          I'll do it from here. Installed TXCTL on this PC.
+          Usage in C:\\Program Files\\Burrell Broadcast\\TXCTL\\README.TXT
 
 10/14/03  It got into the capture files. I can hear the drive
           working when nothing is running. It isn't at the tower
           anymore. It's HERE. Whatever is tuned to it, it lives in.
 
+          So the capture card is its transmitter now. I pointed
+          TXCTL at the card instead of the modem (RCU: LOCAL).
+          Same commands. Same procedure.
+
+          It needs someone watching to stay on the air. When
+          nobody is looking at a screen, it waits.
+
           If you are reading this and I'm not around: it is in
-          this machine now. This PC is the transmitter.
+          this machine. If the log is still unsigned, it is still
+          on the air — it has only been waiting for a viewer.
           Sign it off from here. By the book. Every step. In order.
 
           And DO NOT copy the recordings anywhere.
           That is how it travels.
 
-10/14/03  03:31  It's`,
+10/14/03  03:24  Starting. Old reel, anthem first.
+10/14/03  03:31  anthem ok. bars ok. visual down. aural down.
+                 signing the log n`,
 
   'doc.bearing': `Walt — bearings, from phone call 9/20/03
 ----------------------------------------
@@ -146,6 +168,35 @@ Audio: our sign-off, slowed. Pitched down about a fifth.
 Walt: "Dan, there's no other antenna up there."
 Me:   "I know."`,
 
+  'doc.halvorsen': `HARROW VALLEY BROADCASTING — INTERNAL MEMO           11/02/1987
+TO:   All transmitter staff
+FROM: G. Halvorsen, Chief Engineer
+RE:   The sign-off procedure. READ THIS.
+
+On the night of 10/19 the sign-off reel jammed. The duty engineer
+dropped the carrier without the anthem and without signing the
+log. At 03:33 the transmitter came back on by itself.
+
+What it broadcast was our own sign-off, played back wrong. Over
+the next nine nights it learned the rest of our programming. On
+the tenth night it showed the switcher room. Eddie Kowal was on
+duty. Eddie has not been found.
+
+I do not know what it is. I know what it does. A broadcast day
+that is not closed properly leaves the channel open, and
+something on the other side of the dead air answers. It copies
+us. It hosts. It collects the people who watch it.
+
+I know how it ends. On 10/29 I ran the full procedure — reel with
+anthem, bars and tone, visual off, aural off, log signed — and it
+stopped. The anthem is not for the viewers. It tells the other
+side that the day is over. The signature closes the door.
+
+Do not skip steps. Do not change the order.
+A transmitter that is not signed off is still on the air.
+
+                                                          — G.H.`,
+
   'doc.returnNotes': `RETURN SIGNAL — OBSERVATIONS (D.M.)
 -----------------------------------
 - Starts at 03:33:00 every night we run the new sign-off package.
@@ -156,6 +207,9 @@ Me:   "I know."`,
 - It uses our formats. Station ID. News. Emergency alert.
   It is learning what a broadcast is by watching us.
 - Every set tuned to 12 after sign-off shows it. Marcy's did.
+- Everyone who watches it ends up on its list. Lily watched it once.
+- It can't stay on the air without a viewer. With nobody watching,
+  it waits. It is very patient.
 - Walt thinks it isn't sending. He thinks it's LOOKING.
 - The capture card LED stays on after I shut the PC down.`,
 
@@ -163,8 +217,8 @@ Me:   "I know."`,
 (c) 1998 Burrell Broadcast Systems
 ======================================
 
-Dials the remote control unit (RCU) at the transmitter site
-over the modem line and issues control commands.
+Talks to the remote control unit (RCU) at the transmitter
+site and issues control commands.
 
 USAGE:   txctl <command>
 
@@ -180,8 +234,9 @@ NOTE: Commands are executed immediately. The RCU does not
 check the order of commands. Follow your station's written
 sign-off procedure.
 
--- configured for HVB-12 Pell Hill RCU, line 555-0112
--- D.M. 10/11/03`,
+-- configured for HVB-12 Pell Hill RCU, line 555-0112 (D.M. 10/11/03)
+-- reconfigured 10/14/03: RCU = LOCAL (TVR-878 capture card).
+-- The modem line is no longer needed. It's in here now.`,
 
   'doc.todo': `TO DO
 -----
@@ -328,8 +383,13 @@ LILY MERCER .................... pending
 
 I can't hold it off for long. It reads this while I write it.
 
-Don't move the tapes. It wants out of this box and the tapes
-are the door. If they leave this machine, it leaves with them.
+I didn't finish. It took me at the last step — the log is
+still unsigned, so the station is still on the air. It has
+been waiting in here for someone to watch. Now someone is.
+
+Don't move the tapes. They aren't recordings of it. They ARE
+it. If they leave this machine, it leaves with them — and
+Lily's name is still on its list.
 
 Sign it off. TXCTL. By the book — the book is in Station.
 Every step. In order. Then sign your name. A name it doesn't
@@ -397,6 +457,16 @@ The FCC inspector is coming Monday. Lock up your Engineering folder and take the
 Use the usual password — the visual carrier frequency, digits only, no decimal point.
 
 — R`,
+  'mail.m_karen1.subject': 'What is she watching at your place?',
+  'mail.m_karen1.body': `Dan,
+
+Lily came home from your place and told me she woke up Saturday night and watched "the tall man on the news" on your TV. At 3:30 in the morning, Dan.
+
+She says he waved at her. She hasn't slept right since.
+
+What are you letting her watch?
+
+— K`,
   'mail.m_ruth4.subject': 'Marcy',
   'mail.m_ruth4.body': `Don't come in tonight.
 
@@ -409,6 +479,8 @@ What is this.`,
   'mail.m_walt3.body': `I've been thinking about what you said, about the recordings showing your house.
 
 Dan, I don't think it's a transmission. I think it's a RECEPTION. It isn't sending pictures to us. It's taking pictures FROM us. Every set tuned to 12 is a window, and it is looking out of all of them.
+
+And those recordings of yours — they aren't pictures of it. They're copies of it.
 
 Turn off your TV. Unplug that capture card. I mean it.
 

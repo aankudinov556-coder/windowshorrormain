@@ -14,6 +14,7 @@
     { id: 'm_walt1', folder: 'inbox', from: 'walt', to: 'dan', date: '2003-09-17 04:20' },
     { id: 'm_walt2', folder: 'inbox', from: 'walt', to: 'dan', date: '2003-09-20 05:02' },
     { id: 'm_ruth3', folder: 'inbox', from: 'ruth', to: 'dan', date: '2003-09-23 09:15' },
+    { id: 'm_karen1', folder: 'inbox', from: 'karen', to: 'dan', date: '2003-09-29 08:10' },
     { id: 'm_ruth4', folder: 'inbox', from: 'ruth', to: 'dan', date: '2003-10-01 06:48' },
     { id: 'm_walt3', folder: 'inbox', from: 'walt', to: 'dan', date: '2003-10-10 02:51' },
     { id: 'm_lily2', folder: 'inbox', from: 'karen', to: 'dan', date: '2003-10-13 20:30' },
